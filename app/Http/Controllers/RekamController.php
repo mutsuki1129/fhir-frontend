@@ -128,7 +128,15 @@ class RekamController extends Controller
 
     public function destroy($id)
     {
-        return redirect()->route('admin.rekam.list')->withErrors(['fhir' => 'Delete is disabled in phase 1 clinical flow.']);
+        try {
+            $this->fhirApiClient->delete('Observation', (string) $id);
+
+            return redirect()->route('admin.rekam.list')->with('status', 'Temperature observation deleted successfully.');
+        } catch (FhirApiException $exception) {
+            return redirect()->route('admin.rekam.list')->withErrors(['fhir' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            return redirect()->route('admin.rekam.list')->withErrors(['fhir' => 'Unable to delete observation at this time.']);
+        }
     }
 
     public function update(Request $request, $id)

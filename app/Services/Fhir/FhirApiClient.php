@@ -66,6 +66,12 @@ class FhirApiClient
         return $response->json();
     }
 
+    public function delete(string $resourceType, string $id): void
+    {
+        $response = $this->send(fn () => $this->request()->delete("{$this->baseUrl}/{$resourceType}/{$id}"));
+        $this->throwIfFailed($response);
+    }
+
     private function request(): PendingRequest
     {
         return Http::acceptJson()

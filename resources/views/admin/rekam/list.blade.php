@@ -44,10 +44,19 @@
                                         @endif
                                     </div>
 
-                                    <div class="flex">
+                                    <div class="flex items-center gap-2">
                                         <a href="{{ route('admin.rekam.edit', $rekam->id) }}" data-page-loading-trigger class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
                                             Edit
                                         </a>
+                                        <form action="{{ route('admin.rekam.destroy', $rekam->id) }}" method="POST" onsubmit="return confirm('Delete this medical record? This only deletes the Observation resource.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 transition-colors duration-150 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300" aria-label="Delete medical record" title="Delete medical record">
+                                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M1 5h16M7 1h4m-5 4 1 12h4l1-12M6 5h6"/>
+                                                </svg>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
