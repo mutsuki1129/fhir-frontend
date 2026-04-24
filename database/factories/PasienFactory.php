@@ -21,6 +21,7 @@ class PasienFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'phone_number' => fake()->phoneNumber(),
+            'role_id' => fake()->unique()->numberBetween(1, 999999),// 流水號
             'age' => rand(30, 60),
             'height' => rand(145, 190),
             'weight' => rand(45, 99),

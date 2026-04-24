@@ -24,6 +24,7 @@ class Dokter extends Model
         'weight',
         'password',
         'profile_picture',
+        'role_id',
     ];
 
     protected $hidden = [

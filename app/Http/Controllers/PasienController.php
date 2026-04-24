@@ -2,180 +2,213 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pasien;
-use Ramsey\Uuid\Uuid;
+use App\Services\Fhir\FhirApiClient;
+use App\Services\Fhir\FhirApiException;
+use App\Support\Fhir\PatientMapper;
+use App\ViewModels\PatientVM;
 use Illuminate\Http\Request;
-use function Pest\Laravel\get;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Throwable;
 
 class PasienController extends Controller
 {
+    public function __construct(private readonly FhirApiClient $fhirApiClient)
+    {
+    }
+
+    public function create()
+    {
+        return view('admin.createPasien', [
+            'pageError' => null,
+        ]);
+    }
+
     public function createPasien(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:pasiens|max:50',
-            'phone_number' => 'required|string|max:13',
-            'role_id' => 'required|integer',
-            'password' => 'required|min:6',
-            'age' => 'nullable|integer', 
-            'height' => 'nullable|numeric', 
-            'weight' => 'nullable|numeric', 
-            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
+            'email' => 'nullable|email|max:120',
+            'phone_number' => 'nullable|string|max:20',
         ]);
 
-        $pasien = new Pasien([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone_number' => $validated['phone_number'],
-            'role_id' => $validated['role_id'],
-            'password' => bcrypt($validated['password']),
-            'age' => $validated['age'],
-            'height' => $validated['height'],
-            'weight' => $validated['weight'],
-        ]);
+        try {
+            $patientVm = new PatientVM(
+                id: '',
+                name: $validated['name'],
+                email: $validated['email'] ?? null,
+                phone: $validated['phone_number'] ?? null,
+            );
+            $payload = PatientMapper::toFhirPatient($patientVm);
+            $this->fhirApiClient->create('Patient', $payload);
 
-        if ($request->hasFile('profile_picture')) {
-            $fileName = time().$request->file('profile_picture')->getClientOriginalName();
-            $path = $request->file('profile_picture')->storeAs('images', $fileName, 'public');
-            $pasien->profile_picture = $path;
+            return redirect()->route('pasiens.list')->with('status', 'Patient created successfully');
+        } catch (FhirApiException $exception) {
+            return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            return back()->withInput()->withErrors(['fhir' => 'Unable to create patient at this time.']);
         }
-
-        $pasien->save();
-
-        return redirect()->route('login')->with('status', 'Pasien created successfully');
     }
 
     public function getPasienList(Request $request)
     {
-        $pagination = 9;
-        $query = Pasien::query();
-    
-        if ($request->has('query')) {
-            $search_text = $request->input('query');
-            $query->where(function ($q) use ($search_text) {
-                $q->where('name', 'LIKE', "%$search_text%")
-                    ->orWhere('email', 'LIKE', "%$search_text%")
-                    ->orWhere('phone_number', 'LIKE', "%$search_text%")
-                    ->orWhere('age', 'LIKE', "%$search_text%")
-                    ->orWhere('height', 'LIKE', "%$search_text%")
-                    ->orWhere('weight', 'LIKE', "%$search_text%");
-            });
+        try {
+            $patientList = $this->fetchPatients();
+            $filtered = $this->applySearchAndSort(
+                $patientList,
+                (string) $request->input('query', ''),
+                (string) $request->input('sort_by', 'name_asc')
+            );
+            $pasiens = $this->paginateCollection($filtered, (int) $request->input('page', 1), 9);
+
+            return view('admin.pasiens', [
+                'title' => 'Patients',
+                'pasiens' => $pasiens,
+                'query' => (string) $request->input('query', ''),
+                'sort_by' => (string) $request->input('sort_by', 'name_asc'),
+                'pageError' => null,
+            ]);
+        } catch (FhirApiException $exception) {
+            return view('admin.pasiens', [
+                'title' => 'Patients',
+                'pasiens' => $this->paginateCollection(collect(), 1, 9),
+                'query' => (string) $request->input('query', ''),
+                'sort_by' => (string) $request->input('sort_by', 'name_asc'),
+                'pageError' => $exception->getMessage(),
+            ]);
+        } catch (Throwable $exception) {
+            return view('admin.pasiens', [
+                'title' => 'Patients',
+                'pasiens' => $this->paginateCollection(collect(), 1, 9),
+                'query' => (string) $request->input('query', ''),
+                'sort_by' => (string) $request->input('sort_by', 'name_asc'),
+                'pageError' => 'Unable to load patient list at this time.',
+            ]);
         }
-    
-        if ($request->has('sort_by')) {
-            $sort_by = $request->input('sort_by');
-            if ($sort_by === 'name_asc') {
-                $query->orderBy('name', 'asc');
-            } elseif ($sort_by === 'name_desc') {
-                $query->orderBy('name', 'desc');
-            } elseif ($sort_by === 'age_asc') {
-                $query->orderBy('age', 'asc');
-            } elseif ($sort_by === 'age_desc') {
-                $query->orderBy('age', 'desc');
-            } elseif ($sort_by === 'height_asc') {
-                $query->orderBy('height', 'asc');
-            } elseif ($sort_by === 'height_desc') {
-                $query->orderBy('height', 'desc');
-            } elseif ($sort_by === 'weight_asc') {
-                $query->orderBy('weight', 'asc');
-            } elseif ($sort_by === 'weight_desc') {
-                $query->orderBy('weight', 'desc');
-            }
-        } else {
-            $query->orderBy('name', 'asc');
-        }
-    
-        $pasiens = $query->paginate($pagination);
-    
-        return view('admin.pasiens', [
-            'title' => 'Pasiens',
-            'pasiens' => $pasiens,
-            'query' => $request->input('query'),
-            'sort_by' => $request->input('sort_by'),
-        ]);
     }
-    
 
     public function editPasien($id)
     {
-        $pasien = Pasien::find($id);
-    
-        if (!$pasien) {
-            return redirect()->route('pasien.list')->with('error', 'Pasien not found');
+        try {
+            $resource = $this->fhirApiClient->read('Patient', (string) $id);
+            $pasien = PatientMapper::fromFhirPatient($resource);
+
+            return view('admin.editPasien', [
+                'title' => 'Edit Patient',
+                'pasien' => $pasien,
+                'pageError' => null,
+            ]);
+        } catch (FhirApiException $exception) {
+            return view('admin.editPasien', [
+                'title' => 'Edit Patient',
+                'pasien' => null,
+                'pageError' => $exception->getMessage(),
+            ]);
+        } catch (Throwable $exception) {
+            return view('admin.editPasien', [
+                'title' => 'Edit Patient',
+                'pasien' => null,
+                'pageError' => 'Unable to load patient profile at this time.',
+            ]);
         }
-    
-        return view('admin.editPasien', [
-            'title' => 'Edit Pasien',
-            'pasien' => $pasien,
-        ]);
     }
 
     public function updatePasien(Request $request, $id)
     {
-        $pasien = Pasien::find($id);
-    
-        if (!$pasien) {
-            return redirect()->route('pasien.list')->with('error', 'Pasien not found');
-        }
-    
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:pasiens,email,' . $pasien->id,
-            'phone_number' => 'required|string|max:18',
-            'role_id' => 'required|integer',
-            'age' => 'nullable|integer',
-            'height' => 'nullable|numeric',
-            'weight' => 'nullable|numeric',
+            'email' => 'nullable|email|max:120',
+            'phone_number' => 'nullable|string|max:20',
         ]);
-        
-        $pasien->name = $validated['name'];
-        $pasien->email = $validated['email'];
-        $pasien->phone_number = $validated['phone_number'];
-        $pasien->role_id = $validated['role_id'];
-        $pasien->age = $validated['age'];
-        $pasien->height = $validated['height'];
-        $pasien->weight = $validated['weight'];
-    
-        $pasien->save();
-    
-        return back()->with('status', 'Pasien updated successfully');
+
+        try {
+            $existing = $this->fhirApiClient->read('Patient', (string) $id);
+            $patientVm = new PatientVM(
+                id: (string) $id,
+                name: $validated['name'],
+                email: $validated['email'] ?? null,
+                phone: $validated['phone_number'] ?? null,
+                photoUrl: data_get($existing, 'photo.0.url')
+            );
+            $payload = PatientMapper::toFhirPatient($patientVm, $existing);
+            $this->fhirApiClient->update('Patient', (string) $id, $payload);
+
+            return redirect()->route('pasiens.list')->with('status', 'Patient updated successfully');
+        } catch (FhirApiException $exception) {
+            return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            return back()->withInput()->withErrors(['fhir' => 'Unable to update patient at this time.']);
+        }
     }
-    
+
     public function photoUpload(Request $request, $id)
     {
-        $pasien = Pasien::find($id);
-    
-        if (!$pasien) {
-            return redirect()->route('pasien.list')->with('error', 'Pasien not found');
-        }
-
-        $request->validate([
-            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
-        if ($request->hasFile('profile_picture')) {
-            $picturePath = $request->file('profile_picture')->store('public/pictures');
-            $pasien->profile_picture = str_replace('public/', '', $picturePath);
-        }
-
-        if ($request->type === 'delete') {
-            $pasien->profile_picture = null;
-        }
-
-        $pasien->save();
-
-        return back()->with('status', "Pasien's profile picture updated successfully");
+        return back()->withErrors(['fhir' => 'Profile picture update is disabled in phase 1 clinical flow.']);
     }
 
     public function deletePasien($id)
     {
-        $pasien = Pasien::find($id);
+        return redirect()->route('pasiens.list')->withErrors(['fhir' => 'Patient delete is disabled in phase 1 clinical flow.']);
+    }
 
-        if (!$pasien) {
-            return redirect()->route('pasiens.list')->with('error', 'Pasien not found');
+    /**
+     * @return Collection<int, PatientVM>
+     */
+    private function fetchPatients(): Collection
+    {
+        $bundle = $this->fhirApiClient->search('Patient', ['_count' => 200]);
+        $entries = $bundle['entry'] ?? [];
+        if (!is_array($entries)) {
+            return collect();
         }
-        $pasien->delete();
 
-        return redirect()->route('pasiens.list')->with('status', 'Pasien deleted successfully');
+        return collect($entries)
+            ->map(fn ($entry) => $entry['resource'] ?? null)
+            ->filter(fn ($resource) => is_array($resource) && ($resource['resourceType'] ?? null) === 'Patient')
+            ->map(fn (array $resource) => PatientMapper::fromFhirPatient($resource))
+            ->values();
+    }
+
+    /**
+     * @param Collection<int, PatientVM> $patients
+     * @return Collection<int, PatientVM>
+     */
+    private function applySearchAndSort(Collection $patients, string $search, string $sortBy): Collection
+    {
+        $search = trim(mb_strtolower($search));
+        if ($search !== '') {
+            $patients = $patients->filter(function (PatientVM $patient) use ($search): bool {
+                return str_contains(mb_strtolower($patient->name), $search)
+                    || str_contains(mb_strtolower((string) $patient->email), $search)
+                    || str_contains(mb_strtolower((string) $patient->phone), $search);
+            });
+        }
+
+        if ($sortBy === 'name_desc') {
+            return $patients->sortByDesc(fn (PatientVM $patient) => mb_strtolower($patient->name))->values();
+        }
+
+        return $patients->sortBy(fn (PatientVM $patient) => mb_strtolower($patient->name))->values();
+    }
+
+    /**
+     * @param Collection<int, PatientVM> $items
+     */
+    private function paginateCollection(Collection $items, int $page, int $perPage): LengthAwarePaginator
+    {
+        $total = $items->count();
+        $offset = max($page - 1, 0) * $perPage;
+        $slice = $items->slice($offset, $perPage)->values();
+
+        return new LengthAwarePaginator(
+            $slice,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
     }
 }

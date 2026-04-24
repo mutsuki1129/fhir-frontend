@@ -2,43 +2,82 @@
     <x-slot name="title">
         Dashboard
     </x-slot>
-    
+
     <div>
-        @include('layouts.Sidebar')
+        @include('layouts.sidebar')
         <div class="p-4 sm:ml-64">
             <div class="py-12">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="py-7 px-10 text-gray-900 dark:text-gray-100">
-                            {{ __("Edit Rekam Medis") }}
+                            {{ __("Edit Medical Record") }}
                         </div>
-                        
-                        <form class="px-10 pb-6" method="post" action="{{ route('admin.rekam.update', $rekam->id) }}" enctype="multipart/form-data">
+
+                        <div class="mx-10 mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                            Phase 1 updates temperature Observation only. Legacy image is disabled.
+                        </div>
+
+                        @if ($pageError || !$rekam)
+                            <div class="px-10 pb-10">
+                                <x-error-state
+                                    title="Unable to load medical record"
+                                    :message="$pageError ?? 'Temperature observation data is unavailable right now.'"
+                                    :retry-href="request()->fullUrl()"
+                                />
+                            </div>
+                        @elseif($pasiens->isEmpty())
+                            <div class="px-10 pb-10">
+                                <x-empty-state
+                                    title="No patients available"
+                                    message="Patient options are required before this temperature observation can be updated."
+                                    action-label="Go to Patients"
+                                    :action-href="route('pasiens.list')"
+                                />
+                            </div>
+                        @else
+                        <form class="px-10 pb-6" method="post" action="{{ route('admin.rekam.update', $rekam->id) }}" data-enhanced-form>
                             @csrf
                             @method('patch')
 
                             <div class="mb-4">
-                                <x-input-label for="pasien" :value="__('name Pasien')" />
-                                <x-text-input id="pasien" name="pasien" type="text" class="mt-1 block w-full" :value="old('pasien', $rekam->name_pasien)" required autofocus autocomplete="pasien" />
+                                <x-input-label for="pasien" :value="__('Patient')" />
+                                <select name="pasien" id="pasien" class="block bg-transparent py-2.5 px-0 w-full text-sm border-0 border-b-2 border-gray-300 appearance-none text-gray-500 dark:text-gray-400 dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" required>
+                                    <option value="" disabled>Select Patient</option>
+                                    @foreach($pasiens as $pasien)
+                                        <option value="{{ $pasien->id }}" @selected((string) old('pasien', $rekam->patientId) === (string) $pasien->id)>
+                                            {{ $pasien->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 <x-input-error class="mt-2" :messages="$errors->get('pasien')" />
                             </div>
                             <div class="mb-4">
-                                <x-input-label for="dokter" :value="__('name Dokter')" />
-                                <x-text-input id="dokter" name="dokter" type="text" class="mt-1 block w-full" :value="old('dokter', $rekam->name_dokter)" required autofocus autocomplete="dokter" />
-                                <x-input-error class="mt-2" :messages="$errors->get('dokter')" />
+                                <x-input-label for="effective_datetime" :value="__('Effective Date Time (Optional)')" />
+                                <x-text-input id="effective_datetime" name="effective_datetime" type="datetime-local" class="mt-1 block w-full" :value="old('effective_datetime', $rekam->effectiveDateTime ? \Carbon\Carbon::parse($rekam->effectiveDateTime)->format('Y-m-d\TH:i') : '')" />
+                                <x-input-error class="mt-2" :messages="$errors->get('effective_datetime')" />
                             </div>
                             <div class="mb-4">
-                                <x-input-label for="kondisi" :value="__('Kondisi Kesehatan')" />
-                                <x-text-input id="kondisi" name="kondisi" type="text" class="mt-1 block w-full" :value="old('kondisi', $rekam->kondisi)" required autofocus autocomplete="kondisi" />
+                                <x-input-label for="suhu" :value="__('Body Temperature (°C)')" />
+                                <x-text-input id="suhu" name="suhu" type="text" class="mt-1 block w-full" :value="old('suhu', $rekam->valueCelsius)" required />
+                                <x-input-error class="mt-2" :messages="$errors->get('suhu')" />
+                            </div>
+                            <div class="mb-4">
+                                <x-input-label for="kondisi" :value="__('Legacy Condition Note (Optional)')" />
+                                <x-text-input id="kondisi" name="kondisi" type="text" class="mt-1 block w-full" :value="old('kondisi', $rekam->note)" />
+                                <p class="mt-1 text-xs text-amber-700">Legacy field: temporarily stored as Observation.note.</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('kondisi')" />
                             </div>
                             <div class="mb-4">
-                                <x-input-label for="suhu" :value="__('Suhu Tubuh')" />
-                                <x-text-input id="suhu" name="suhu" type="text" class="mt-1 block w-full" :value="old('suhu', $rekam->suhu)" required autofocus autocomplete="suhu" />
-                                <x-input-error class="mt-2" :messages="$errors->get('suhu')" />
+                                <x-input-label for="picture_legacy" :value="__('Legacy Picture')" />
+                                <x-text-input id="picture_legacy" name="picture_legacy" type="text" class="mt-1 block w-full bg-gray-100" value="Disabled in Phase 1" disabled />
+                                <p class="mt-1 text-xs text-amber-700">Legacy field disabled in Phase 1.</p>
                             </div>
-                            <button type="submit" class="text-white bg-blue-700 mb-3 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+                            <button type="submit" class="text-white bg-blue-700 mb-3 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">
+                                <span data-submit-default>Submit</span>
+                                <span data-submit-loading class="hidden">Saving...</span>
+                            </button>
                         </form>
+                        @endif
                     </div>
                 </div>
             </div>

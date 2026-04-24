@@ -24,6 +24,7 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->unsignedBigInteger('role_id');//新增role_id
         });
     }
 

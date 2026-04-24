@@ -41,6 +41,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/edit-dokter/{id}', [DokterController::class, 'updateDokter'])->name('dokters.update');
     Route::patch('/photo-dokter/{id}', [DokterController::class, 'photoUpload'])->name('pictureDokter.update');
     Route::get('/delete-dokter/{id}', [DokterController::class, 'deleteDokter'])->name('dokters.delete');
+    // 顯示表單
+	Route::get('/dokters/create', [DokterController::class, 'create'])->name('dokters.create');
+	// 接收表單
+	Route::post('/dokters', [DokterController::class, 'createDokter'])->name('dokters.store');
 
     // pasien control
     Route::get('/pasiens', [PasienController::class, 'getPasienList'])->name('pasiens.list');
@@ -48,6 +52,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/edit-pasien/{id}', [PasienController::class, 'updatePasien'])->name('pasiens.update');
     Route::patch('/photo-pasien/{id}', [PasienController::class, 'photoUpload'])->name('picturePasien.update');
     Route::get('/delete-pasien/{id}', [PasienController::class, 'deletePasien'])->name('pasiens.delete');
+    Route::get('/pasiens/create', [PasienController::class, 'create'])->name('pasiens.create');
+	Route::post('/pasiens', [PasienController::class, 'createPasien'])->name('pasiens.store');
+
 });
 
 // profile

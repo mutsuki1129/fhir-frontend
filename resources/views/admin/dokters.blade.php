@@ -1,12 +1,17 @@
 <x-app-layout>
     <x-slot name="title">
-        Dokters
+        Doctors
     </x-slot>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight inline-block">
-                {{ __('Dokters List') }}
+                {{ __('Doctors List') }}
             </h2>
+            <a href="{{ route('dokters.create') }}"
+               class="inline-block ml-4 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded hover:bg-green-700 transition">
+                + Add Doctor
+            </a>
+
             <form action="{{ route('dokters.list') }}" method="get" class="w-1/2 inline-block">   
                 <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
                 <div class="relative">

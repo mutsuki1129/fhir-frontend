@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'fhir' => [
+        'phase1_enabled' => env('FHIR_PHASE1_ENABLED', true),
+        'base_url' => env('FHIR_BASE_URL', 'http://localhost:8091/fhir'),
+        'timeout' => (int) env('FHIR_TIMEOUT_SECONDS', 10),
+        'identifier_system' => env('FHIR_PATIENT_IDENTIFIER_SYSTEM', 'urn:app:patient'),
+    ],
+
 ];

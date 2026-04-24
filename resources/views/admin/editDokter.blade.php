@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Edit Dokter') }}
+            {{ __('Edit Doctor') }}
         </h2>
     </x-slot>
 
@@ -11,23 +11,16 @@
                 <div class="col-span-7 sm:col-span-2">
                     <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg" style="height: 100%;">
                         <div class="max-w-4xl">
-                            @include('admin.partials.update-profile-picture-information-form')
+                            @include('admin.partials.update-profile-picture-information-form', ['user' => $dokter, 'updateRoute' => route('pictureDokter.update', ['id' => $dokter->id])])
                         </div>
                     </div>
                 </div>
                 <div class="col-span-7 sm:col-span-5">
                     <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg" style="height: 100%;">
                         <div class="max-w-4xl">
-                            @include('admin.partials.update-profile-information-form')
+                            @include('admin.partials.update-profile-information-form', ['user' => $dokter, 'updateRoute' => route('dokters.update', ['id' => $dokter->id])])
                         </div>
                     </div>
-                </div>
-            </div>
-
-
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('admin.partials.delete-user-form')
                 </div>
             </div>
         </div>

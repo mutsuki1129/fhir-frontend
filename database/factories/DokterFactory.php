@@ -25,6 +25,7 @@ class DokterFactory extends Factory
             'height' => rand(145, 190),
             'weight' => rand(45, 99),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'role_id' => fake()->unique()->numberBetween(1, 999999),// 流水號
             'remember_token' => Str::random(10),
         ];
     }

@@ -1,12 +1,125 @@
-# EF234301_WEBPRO(E)_MID
+# FHIR Frontend
 
-| NRP | Name |
-| --- | --- |
-| 5025211015 | Muhammad Daffa Ashdaqfillah |
+## Project overview
 
+Laravel Blade frontend for the FHIR training project. Phase 1 keeps the frontend scoped to:
 
+- `Patient`
+- body temperature `Observation`
 
-## Page Layout (View)
+This round includes repo baseline cleanup and Phase 1 hardening for loading, empty, error, and success presentation.
+
+## Phase 1 scope
+
+In scope:
+
+- Patients list / create / edit
+- Medical records list / create / edit
+- Medical records grouped views
+- shared loading / empty / error / success handling
+
+Out of scope:
+
+- Doctor / Practitioner implementation
+- `Condition` formal integration
+- `Media` / `DocumentReference` formal integration
+- large UI redesign
+- Phase 2 implementation
+
+## Tech stack
+
+- Laravel
+- Blade components
+- Tailwind CSS
+- Vite
+- Alpine.js
+- Flowbite styles
+
+## Getting started
+
+Install dependencies:
+
+```bash
+composer install
+npm install
+```
+
+Run locally:
+
+```bash
+php artisan serve
+npm run dev
+```
+
+With Docker:
+
+```bash
+docker compose up -d
+docker compose exec app php artisan config:clear
+docker compose exec app php artisan view:clear
+```
+
+## Environment variables
+
+Key frontend-related values:
+
+- `APP_URL`
+- `FHIR_BASE_URL`
+- `FHIR_TIMEOUT`
+- `FHIR_PHASE1_ENABLED`
+
+Current documented defaults:
+
+- local FHIR: `http://localhost:8091/fhir`
+- Docker FHIR: `http://host.docker.internal:8091/fhir`
+- Phase 1 flag: `FHIR_PHASE1_ENABLED=true`
+
+Use `.env` for local runtime. `.env.docker` is provided as a Docker-oriented reference and should not be treated as production config.
+
+## Backend integration
+
+Phase 1 frontend follows backend-first FHIR contracts.
+
+- `Patient` pages call FHIR Patient endpoints through the Laravel FHIR client.
+- medical records pages call temperature `Observation` endpoints with fixed body temperature coding.
+- `OperationOutcome` is normalized into user-facing error copy for the UI.
+- timeout and network failures are surfaced as actionable frontend error states.
+
+## Known limitations
+
+- Phase 1 only supports `Patient` and temperature `Observation`.
+- `kondisi` remains a legacy note and is not a formal `Condition` workflow yet.
+- `picture` stays disabled in Phase 1 and is not integrated with `Media` or `DocumentReference`.
+- Doctor pages are still legacy and are not part of the hardened Phase 1 frontend contract.
+- full legacy fallback behind `FHIR_PHASE1_ENABLED=false` is still incomplete.
+
+## Docs
+
+Project references:
+
+- `FRONTEND_FHIR_USAGE.md`
+- `FRONTEND_PHASE1_PLAN.md`
+- `INTEGRATION_TASKS_PHASE1.md`
+- `SERVER_CAPABILITY.md`
+- `BACKEND_GAPS_FOR_PHASE1.md`
+- `docs/README.md`
+- `docs/frontend/commit-checklist.md`
+
+## Frontend first commit checklist
+
+- repo README baseline
+- `.gitignore` baseline
+- docs structure baseline
+- shared loading / empty / error state components
+- unified success / error alerts
+- Patients list / create / edit hardening
+- Medical records list / create / edit hardening
+- grouped medical record views hardening
+- smoke test log
+
+---
+
+## Legacy screenshots
 
 ### Login-Register
 

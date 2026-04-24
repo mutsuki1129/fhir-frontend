@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('pictureDokter.update', ['id' => $user->id]) }}" class="mt-6 space-y-6" enctype="multipart/form-data">
+    <form method="post" action="{{ $updateRoute ?? route('profile.update') }}" class="mt-6 space-y-6">
         @csrf
         @method('patch')
 
@@ -49,6 +49,7 @@
         </div>
     </form>
 </section>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script type="text/javascript">
     function readURL(input) {
