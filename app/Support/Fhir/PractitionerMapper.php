@@ -55,4 +55,47 @@ class PractitionerMapper
             phone: $phone,
         );
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function toFhirPractitioner(
+        ?string $id,
+        string $name,
+        ?string $email,
+        ?string $phone,
+    ): array {
+        $resource = [
+            'resourceType' => 'Practitioner',
+            'active' => true,
+            'name' => [[
+                'text' => $name,
+            ]],
+        ];
+
+        if ($id !== null && $id !== '') {
+            $resource['id'] = $id;
+        }
+
+        $telecom = [];
+        if ($email !== null && $email !== '') {
+            $telecom[] = [
+                'system' => 'email',
+                'value' => $email,
+                'use' => 'work',
+            ];
+        }
+        if ($phone !== null && $phone !== '') {
+            $telecom[] = [
+                'system' => 'phone',
+                'value' => $phone,
+                'use' => 'work',
+            ];
+        }
+        if ($telecom !== []) {
+            $resource['telecom'] = $telecom;
+        }
+
+        return $resource;
+    }
 }

@@ -2,11 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Dokter;
+use App\Services\Fhir\FhirApiClient;
+use App\Services\Fhir\FhirApiException;
+use App\Support\Fhir\PractitionerMapper;
+use App\ViewModels\PractitionerVM;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Throwable;
 
 class DokterController extends Controller
 {
+    public function __construct(private readonly FhirApiClient $fhirApiClient)
+    {
+    }
+
     public function create()
     {
         return view('admin.createDokter');
@@ -16,169 +26,204 @@ class DokterController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:dokters|max:50',
-            'phone_number' => 'required|string|max:13',
-            'role_id' => 'required|integer',
-            'password' => 'required|min:6',
+            'email' => 'nullable|email|max:100',
+            'phone_number' => 'nullable|string|max:32',
+            'role_id' => 'nullable|string|max:32',
+            'password' => 'nullable|string|max:100',
             'age' => 'nullable|integer',
             'height' => 'nullable|numeric',
             'weight' => 'nullable|numeric',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $dokter = new Dokter([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone_number' => $validated['phone_number'],
-            'role_id' => $validated['role_id'],
-            'password' => bcrypt($validated['password']),
-            'age' => $validated['age'],
-            'height' => $validated['height'],
-            'weight' => $validated['weight'],
-        ]);
+        try {
+            $payload = PractitionerMapper::toFhirPractitioner(
+                id: null,
+                name: $validated['name'],
+                email: self::emptyToNull((string) ($validated['email'] ?? '')),
+                phone: self::emptyToNull((string) ($validated['phone_number'] ?? '')),
+            );
 
-        if ($request->hasFile('profile_picture')) {
-            $fileName = time() . $request->file('profile_picture')->getClientOriginalName();
-            $path = $request->file('profile_picture')->storeAs('images', $fileName, 'public');
-            $dokter->profile_picture = $path;
+            $this->fhirApiClient->create('Practitioner', $payload);
+
+            return redirect()->route('dokters.list')->with('status', 'Practitioner created successfully. Non-FHIR doctor profile fields are deferred.');
+        } catch (FhirApiException $exception) {
+            return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            return back()->withInput()->withErrors(['fhir' => 'Unable to create practitioner at this time.']);
         }
-
-        $dokter->save();
-
-        return redirect()->route('dokters.list')->with('status', 'Doctor created successfully');
     }
 
     public function getDokterList(Request $request)
     {
-        $pagination = 9;
-        $query = Dokter::query();
+        $queryText = trim((string) $request->input('query', ''));
+        $sortBy = (string) $request->input('sort_by', '');
+        $page = max(1, (int) $request->input('page', 1));
+        $perPage = 9;
 
-        if ($request->has('query')) {
-            $searchText = $request->input('query');
-            $query->where(function ($q) use ($searchText) {
-                $q->where('name', 'LIKE', "%$searchText%")
-                    ->orWhere('email', 'LIKE', "%$searchText%")
-                    ->orWhere('phone_number', 'LIKE', "%$searchText%")
-                    ->orWhere('age', 'LIKE', "%$searchText%")
-                    ->orWhere('height', 'LIKE', "%$searchText%")
-                    ->orWhere('weight', 'LIKE', "%$searchText%");
-            });
-        }
+        try {
+            $bundle = $this->fhirApiClient->search('Practitioner', ['_count' => 200]);
+            $entries = $bundle['entry'] ?? [];
 
-        if ($request->has('sort_by')) {
-            $sortBy = $request->input('sort_by');
-            if ($sortBy === 'name_asc') {
-                $query->orderBy('name', 'asc');
-            } elseif ($sortBy === 'name_desc') {
-                $query->orderBy('name', 'desc');
-            } elseif ($sortBy === 'age_asc') {
-                $query->orderBy('age', 'asc');
-            } elseif ($sortBy === 'age_desc') {
-                $query->orderBy('age', 'desc');
-            } elseif ($sortBy === 'height_asc') {
-                $query->orderBy('height', 'asc');
-            } elseif ($sortBy === 'height_desc') {
-                $query->orderBy('height', 'desc');
-            } elseif ($sortBy === 'weight_asc') {
-                $query->orderBy('weight', 'asc');
-            } elseif ($sortBy === 'weight_desc') {
-                $query->orderBy('weight', 'desc');
+            $items = collect($entries)
+                ->map(fn ($entry) => $entry['resource'] ?? null)
+                ->filter(fn ($resource) => is_array($resource) && ($resource['resourceType'] ?? null) === 'Practitioner')
+                ->map(fn (array $resource) => PractitionerMapper::fromFhirPractitioner($resource))
+                ->map(fn (PractitionerVM $vm) => $this->toDoctorViewModel($vm));
+
+            if ($queryText !== '') {
+                $needle = mb_strtolower($queryText);
+                $items = $items->filter(function (object $doctor) use ($needle): bool {
+                    $haystack = mb_strtolower(implode(' ', [
+                        (string) $doctor->name,
+                        (string) ($doctor->email ?? ''),
+                        (string) ($doctor->phone_number ?? ''),
+                    ]));
+
+                    return str_contains($haystack, $needle);
+                })->values();
             }
-        } else {
-            $query->orderBy('name', 'asc');
+
+            $items = $this->sortDoctors($items, $sortBy);
+            $paginator = $this->paginateCollection($items, $page, $perPage, $request);
+
+            return view('admin.dokters', [
+                'title' => 'Doctors',
+                'dokters' => $paginator,
+                'query' => $queryText,
+                'sort_by' => $sortBy,
+            ]);
+        } catch (FhirApiException $exception) {
+            return view('admin.dokters', [
+                'title' => 'Doctors',
+                'dokters' => $this->paginateCollection(collect(), 1, $perPage, $request),
+                'query' => $queryText,
+                'sort_by' => $sortBy,
+            ])->withErrors(['fhir' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            return view('admin.dokters', [
+                'title' => 'Doctors',
+                'dokters' => $this->paginateCollection(collect(), 1, $perPage, $request),
+                'query' => $queryText,
+                'sort_by' => $sortBy,
+            ])->withErrors(['fhir' => 'Unable to load practitioners at this time.']);
         }
-
-        $dokters = $query->paginate($pagination);
-
-        return view('admin.dokters', [
-            'title' => 'Doctors',
-            'dokters' => $dokters,
-            'query' => $request->input('query'),
-            'sort_by' => $request->input('sort_by'),
-        ]);
     }
 
     public function editDokter($id)
     {
-        $dokter = Dokter::find($id);
+        try {
+            $resource = $this->fhirApiClient->read('Practitioner', (string) $id);
+            $vm = PractitionerMapper::fromFhirPractitioner($resource);
+            $dokter = $this->toDoctorViewModel($vm);
 
-        if (!$dokter) {
-            return redirect()->route('dokters.list')->with('error', 'Doctor not found');
+            return view('admin.editDokter', [
+                'title' => 'Edit Doctor',
+                'dokter' => $dokter,
+            ]);
+        } catch (FhirApiException $exception) {
+            return redirect()->route('dokters.list')->withErrors(['fhir' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            return redirect()->route('dokters.list')->withErrors(['fhir' => 'Unable to load practitioner for edit.']);
         }
-
-        return view('admin.editDokter', [
-            'title' => 'Edit Doctor',
-            'dokter' => $dokter,
-        ]);
     }
 
     public function updateDokter(Request $request, $id)
     {
-        $dokter = Dokter::find($id);
-
-        if (!$dokter) {
-            return redirect()->route('dokters.list')->with('error', 'Doctor not found');
-        }
-
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:dokters,email,' . $dokter->id,
-            'phone_number' => 'required|string|max:18',
-            'role_id' => 'required|integer',
+            'email' => 'nullable|email|max:100',
+            'phone_number' => 'nullable|string|max:32',
+            'role_id' => 'nullable|string|max:32',
             'age' => 'nullable|integer',
             'height' => 'nullable|numeric',
             'weight' => 'nullable|numeric',
         ]);
 
-        $dokter->name = $validated['name'];
-        $dokter->email = $validated['email'];
-        $dokter->phone_number = $validated['phone_number'];
-        $dokter->role_id = $validated['role_id'];
-        $dokter->age = $validated['age'];
-        $dokter->height = $validated['height'];
-        $dokter->weight = $validated['weight'];
+        try {
+            $payload = PractitionerMapper::toFhirPractitioner(
+                id: (string) $id,
+                name: $validated['name'],
+                email: self::emptyToNull((string) ($validated['email'] ?? '')),
+                phone: self::emptyToNull((string) ($validated['phone_number'] ?? '')),
+            );
+            $this->fhirApiClient->update('Practitioner', (string) $id, $payload);
 
-        $dokter->save();
-
-        return redirect()->route('dokters.list')->with('status', 'Doctor updated successfully');
+            return redirect()->route('dokters.list')->with('status', 'Practitioner updated successfully. Non-FHIR doctor profile fields are deferred.');
+        } catch (FhirApiException $exception) {
+            return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            return back()->withInput()->withErrors(['fhir' => 'Unable to update practitioner at this time.']);
+        }
     }
 
     public function photoUpload(Request $request, $id)
     {
-        $dokter = Dokter::find($id);
-
-        if (!$dokter) {
-            return redirect()->route('dokters.list')->with('error', 'Doctor not found');
-        }
-
-        $request->validate([
-            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
-        if ($request->hasFile('profile_picture')) {
-            $picturePath = $request->file('profile_picture')->store('public/pictures');
-            $dokter->profile_picture = str_replace('public/', '', $picturePath);
-        }
-
-        if ($request->type === 'delete') {
-            $dokter->profile_picture = null;
-        }
-
-        $dokter->save();
-
-        return back()->with('status', "Doctor's profile picture updated successfully");
+        return back()->withErrors(['fhir' => 'Profile picture is not part of current Practitioner contract in Phase 3 M4.']);
     }
 
     public function deleteDokter($id)
     {
-        $dokter = Dokter::find($id);
+        try {
+            $this->fhirApiClient->delete('Practitioner', (string) $id);
 
-        if (!$dokter) {
-            return redirect()->route('dokters.list')->with('error', 'Doctor not found');
+            return redirect()->route('dokters.list')->with('status', 'Practitioner deleted successfully.');
+        } catch (FhirApiException $exception) {
+            return redirect()->route('dokters.list')->withErrors(['fhir' => $exception->getMessage()]);
+        } catch (Throwable $exception) {
+            return redirect()->route('dokters.list')->withErrors(['fhir' => 'Unable to delete practitioner at this time.']);
         }
+    }
 
-        $dokter->delete();
+    /**
+     * @param Collection<int, object> $items
+     */
+    private function sortDoctors(Collection $items, string $sortBy): Collection
+    {
+        return match ($sortBy) {
+            'name_desc' => $items->sortByDesc(fn (object $item) => mb_strtolower((string) $item->name))->values(),
+            default => $items->sortBy(fn (object $item) => mb_strtolower((string) $item->name))->values(),
+        };
+    }
 
-        return redirect()->route('dokters.list')->with('status', 'Doctor deleted successfully');
+    /**
+     * @param Collection<int, object> $items
+     */
+    private function paginateCollection(Collection $items, int $page, int $perPage, Request $request): LengthAwarePaginator
+    {
+        $total = $items->count();
+        $pageItems = $items->slice(($page - 1) * $perPage, $perPage)->values();
+
+        return new LengthAwarePaginator(
+            items: $pageItems,
+            total: $total,
+            perPage: $perPage,
+            currentPage: $page,
+            options: [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ],
+        );
+    }
+
+    private function toDoctorViewModel(PractitionerVM $vm): object
+    {
+        return (object) [
+            'id' => $vm->id,
+            'name' => $vm->name,
+            'email' => $vm->email,
+            'phone_number' => $vm->phone,
+            'age' => '-',
+            'height' => '-',
+            'weight' => '-',
+            'role_id' => '-',
+            'profile_picture' => null,
+        ];
+    }
+
+    private static function emptyToNull(string $value): ?string
+    {
+        $trimmed = trim($value);
+        return $trimmed !== '' ? $trimmed : null;
     }
 }

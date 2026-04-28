@@ -39,8 +39,13 @@ Build a stable frontend integration layer on top of existing Phase 1/2 behavior,
 - [x] Patient-latest inference warning added to reduce timeline misunderstanding
 - [x] UI notes documented: `docs/frontend/phase3-linkage-ui-notes.md`
 
-### M4 (Planned)
+### M4 (In progress - Practitioner migration step 1 completed)
 
+- [x] Doctor controller moved to FHIR Practitioner facade flow (list/create/edit)
+- [x] Rekam performer semantics aligned with doctor data source (`Practitioner`)
+- [x] Migration notes documented: `docs/frontend/phase3-practitioner-migration-notes.md`
+- [ ] Remove legacy doctor-only UI fields not in current Practitioner contract
+- [ ] Add explicit OperationOutcome mapping for doctor create/edit form errors
 - [ ] Expand key coverage to create/edit forms and validation/error messages
 - [ ] Add URL/query based locale persistence strategy evaluation
 - [ ] Add smoke checklist for cross-locale UI paths
