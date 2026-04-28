@@ -8,6 +8,16 @@
         <div class="p-4 sm:ml-64">
             <div class="py-12">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    @if (session('status'))
+                        <div class="mb-4 rounded border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+                    @if ($errors->has('fhir'))
+                        <div class="mb-4 rounded border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+                            {{ $errors->first('fhir') }}
+                        </div>
+                    @endif
                     <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                         Phase 2 list shows Observation + Condition + DocumentReference state with non-blocking fallback.
                     </div>
@@ -27,13 +37,13 @@
 
                     @if ($pageError)
                         <x-error-state
-                            title="Unable to load medical records"
+                            :title="__('ui.rekam.load_error')"
                             :message="$pageError"
                             :retry-href="route('admin.rekam.list')"
                         />
                     @elseif($rekams->isEmpty())
                         <x-empty-state
-                            title="No temperature observations yet"
+                            :title="__('ui.rekam.empty')"
                             message="Create the first temperature observation to continue the clinical flow."
                             action-label="Add Medical Record"
                             :action-href="route('admin.rekam.create')"

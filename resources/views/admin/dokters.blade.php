@@ -31,17 +31,27 @@
     <div class="relative overflow-x-auto py-10">
     @if(isset($dokters))
     <div class="mx-auto w-full px-8 overflow-x-auto lg:px-56 md:px-14">
+        @if (session('status'))
+            <div class="mb-4 rounded border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                {{ session('status') }}
+            </div>
+        @endif
+        @if ($errors->has('fhir'))
+            <div class="mb-4 rounded border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+                {{ $errors->first('fhir') }}
+            </div>
+        @endif
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>    
                 <th scope="col" class="px-6 py-3 rounded-tl-lg">
                     <div class="flex items-center">
-                        NO
+                        {{ __('ui.common.no') }}
                     </div>
                 </th>
                 <th scope="col" class="px-6 py-3">
                     <div class="flex items-center">
-                        Name
+                        {{ __('ui.common.name') }}
                         <div class="hidden sm:flex sm:items-center">
                             <x-dropdown align="left" width="24">
                                 <x-slot name="trigger">
@@ -81,12 +91,12 @@
                 </th>
                 <th scope="col" class="px-6 py-3">
                     <div class="flex items-center">
-                        Email
+                        {{ __('ui.common.email') }}
                     </div>
                 </th>
                 <th scope="col" class="px-6 py-3">
                     <div class="flex items-center">
-                        Phone Number
+                        {{ __('ui.common.phone') }}
                     </div>
                 </th>
                 <th scope="col" class="px-3 py-3">

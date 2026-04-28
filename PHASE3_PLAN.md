@@ -50,6 +50,12 @@ Build a stable frontend integration layer on top of existing Phase 1/2 behavior,
 - [ ] Add URL/query based locale persistence strategy evaluation
 - [ ] Add smoke checklist for cross-locale UI paths
 
+### M5 (Completed in this batch - pre-freeze regression tightening)
+
+- [x] Regression convergence on medical-record/patient/doctor pages for success/error/empty visibility
+- [x] i18n key consistency tightened on touched list pages to reduce hard-string drift
+- [x] Added manual smoke/regression checklist: `docs/frontend/phase3-m5-smoke-checklist.md`
+
 ## Risks
 
 - Existing views mix literal strings and translation calls, so full migration should be incremental

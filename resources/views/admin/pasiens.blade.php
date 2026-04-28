@@ -30,18 +30,28 @@
 
     <div class="relative overflow-x-auto py-10">
         <div class="mx-auto w-full px-8 overflow-x-auto lg:px-56 md:px-14">
+            @if (session('status'))
+                <div class="mb-4 rounded border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                    {{ session('status') }}
+                </div>
+            @endif
+            @if ($errors->has('fhir'))
+                <div class="mb-4 rounded border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+                    {{ $errors->first('fhir') }}
+                </div>
+            @endif
             <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                 Phase 1 list is sourced from FHIR Patient. Legacy patient metrics are hidden.
             </div>
             @if ($pageError)
                 <x-error-state
-                    title="Unable to load patients"
+                    :title="__('ui.patients.load_error')"
                     :message="$pageError"
                     :retry-href="route('pasiens.list', request()->query())"
                 />
             @elseif($pasiens->total() === 0)
                 <x-empty-state
-                    :title="$query !== '' ? 'No matching patients' : 'No patients yet'"
+                    :title="$query !== '' ? __('ui.patients.empty_filtered') : __('ui.patients.empty')"
                     :message="$query !== '' ? 'Try a different keyword or clear the search filters.' : 'Create the first patient to start the Phase 1 Patient flow.'"
                     action-label="Add Patient"
                     :action-href="route('pasiens.create')"
@@ -50,10 +60,10 @@
             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
-                        <th scope="col" class="px-6 py-3 rounded-tl-lg">NO</th>
+                        <th scope="col" class="px-6 py-3 rounded-tl-lg">{{ __('ui.common.no') }}</th>
                         <th scope="col" class="px-6 py-3">
                             <div class="flex items-center">
-                                Name
+                                {{ __('ui.common.name') }}
                                 <div class="hidden sm:flex sm:items-center">
                                     <x-dropdown align="left" width="24">
                                         <x-slot name="trigger">
@@ -81,8 +91,8 @@
                                 </div>
                             </div>
                         </th>
-                        <th scope="col" class="px-6 py-3">Email</th>
-                        <th scope="col" class="px-6 py-3">Phone Number</th>
+                        <th scope="col" class="px-6 py-3">{{ __('ui.common.email') }}</th>
+                        <th scope="col" class="px-6 py-3">{{ __('ui.common.phone') }}</th>
                         <th scope="col" class="rounded-tr-lg"></th>
                     </tr>
                 </thead>
