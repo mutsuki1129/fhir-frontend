@@ -11,6 +11,9 @@
                     <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                         Phase 2 list shows Observation + Condition + DocumentReference state with non-blocking fallback.
                     </div>
+                    <div class="mb-4 rounded border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+                        Linkage note: Condition and DocumentReference are resolved by patient-latest inference, not guaranteed to share the same timestamp as this Observation.
+                    </div>
                     @if (!empty($conditionWarning))
                         <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                             Condition service warning (non-blocking): {{ $conditionWarning }}

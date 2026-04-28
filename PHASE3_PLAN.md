@@ -32,7 +32,14 @@ Build a stable frontend integration layer on top of existing Phase 1/2 behavior,
 - [x] Navigation + patient/doctor/medical-record common labels migrated to key-based translation
 - [x] i18n key guideline document added: `docs/frontend/phase3-i18n-key-guideline.md`
 
-### M3 (Planned)
+### M3 (Completed in this batch)
+
+- [x] Cross-page linkage hints aligned on medical-record list/grouped views
+- [x] Condition/legacy-note/document-reference status display made consistent on list, patient-group, and practitioner-group pages
+- [x] Patient-latest inference warning added to reduce timeline misunderstanding
+- [x] UI notes documented: `docs/frontend/phase3-linkage-ui-notes.md`
+
+### M4 (Planned)
 
 - [ ] Expand key coverage to create/edit forms and validation/error messages
 - [ ] Add URL/query based locale persistence strategy evaluation
@@ -43,6 +50,7 @@ Build a stable frontend integration layer on top of existing Phase 1/2 behavior,
 - Existing views mix literal strings and translation calls, so full migration should be incremental
 - Locale switching currently uses session + back redirect; deep-link locale behavior is deferred
 - Legacy Blade pages may need targeted cleanups before wider i18n rollout
+- Condition/DocumentReference currently use patient-latest inference, not strict per-observation linkage
 
 ## Acceptance Criteria
 
@@ -50,6 +58,7 @@ Build a stable frontend integration layer on top of existing Phase 1/2 behavior,
 2. Patient and doctor list page common title/search/add labels are translated by keys
 3. Medical record landing title is translated by key
 4. Existing Phase 1 and Phase 2 workflows remain operational
+5. Linkage statuses are displayed consistently in list, patient-group, and practitioner-group views
 
 ## Backend Dependencies
 
