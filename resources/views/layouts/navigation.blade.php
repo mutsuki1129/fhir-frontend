@@ -14,16 +14,16 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link :href="route('dashboard.admin')" :active="request()->routeIs('dashboard.admin')">
-                        {{ __('Dashboard') }}
+                        {{ __('ui.nav.dashboard') }}
                     </x-nav-link>
                     <x-nav-link :href="route('admin.rekam.list')" :active="request()->routeIs('admin.rekam.*')">
-                        {{ __('Medical Records') }}
+                        {{ __('ui.nav.medical_records') }}
                     </x-nav-link>
                     <x-nav-link :href="route('dokters.list')" :active="request()->routeIs('dokters.list')">
-                        {{ __('Doctors') }}
+                        {{ __('ui.nav.doctors') }}
                     </x-nav-link>
                     <x-nav-link :href="route('pasiens.list')" :active="request()->routeIs('pasiens.list')">
-                        {{ __('Patients') }}
+                        {{ __('ui.nav.patients') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -45,7 +45,16 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('ui.nav.profile') }}
+                        </x-dropdown-link>
+
+                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                        <div class="px-4 py-2 text-xs text-gray-500">{{ __('ui.nav.language') }}</div>
+                        <x-dropdown-link :href="route('locale.switch', ['locale' => 'en'])">
+                            {{ __('ui.lang.en') }}
+                        </x-dropdown-link>
+                        <x-dropdown-link :href="route('locale.switch', ['locale' => 'zh_TW'])">
+                            {{ __('ui.lang.zh_tw') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -55,7 +64,7 @@
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('ui.nav.logout') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -78,7 +87,7 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard.admin')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                {{ __('ui.nav.dashboard') }}
             </x-responsive-nav-link> 
         </div>
 
@@ -91,7 +100,14 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('ui.nav.profile') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('locale.switch', ['locale' => 'en'])">
+                    {{ __('ui.lang.en') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('locale.switch', ['locale' => 'zh_TW'])">
+                    {{ __('ui.lang.zh_tw') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
@@ -101,7 +117,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('ui.nav.logout') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

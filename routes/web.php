@@ -20,6 +20,16 @@ require __DIR__.'/auth.php';
 
 Route::view('/', 'home')->name('home');
 
+Route::get('/locale/{locale}', function (string $locale) {
+    if (! in_array($locale, ['en', 'zh_TW'], true)) {
+        abort(404);
+    }
+
+    session(['locale' => $locale]);
+
+    return redirect()->back();
+})->name('locale.switch');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard.admin');
