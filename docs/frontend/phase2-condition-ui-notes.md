@@ -2,7 +2,7 @@
 
 ## 目的
 
-本文件說明 Phase 2 在病例（rekam）頁面的 Condition UI 規則，確保前端行為與目前後端契約一致，且不破壞既有 Phase 1 Observation 流程。
+本文件說明 Phase 2 在病例（rekam）頁面的 Condition UI 規則，以及同頁的 Practitioner、DocumentReference baseline 行為，確保前端與目前後端契約一致，且不破壞既有 Phase 1 Observation 流程。
 
 ## 契約對齊（目前版本）
 
@@ -26,6 +26,11 @@
   - `Condition Code (Optional)`
   - `Condition Text (Optional)`
 - 提示文字明確標示 backend contract 的最大長度
+- 新增並保留 Practitioner 欄位：
+  - `Practitioner (Optional)`（來源為 FHIR `Practitioner`）
+- 新增 DocumentReference baseline 欄位：
+  - `Document Title (Optional)`
+  - `Document URL (Optional)`
 
 ### 2) `/rekam` list 卡片狀態
 
@@ -38,6 +43,11 @@
 - Condition 服務不可用：
   - 頁面上方顯示 non-blocking 警示
   - Observation 卡片仍正常顯示，流程不中斷
+- DocumentReference 可用時：
+  - 顯示 `DocumentReference available` 標記
+  - 顯示可點擊附件連結
+- DocumentReference 不可用或未提供時：
+  - 顯示 `No document reference` 狀態，不阻斷 Observation
 
 ## Fallback 準則
 
@@ -46,9 +56,12 @@
   - Observation 儲存/更新不應被阻斷
   - 使用者可透過警示得知 Condition 未成功同步
   - legacy note 仍可作為過渡資訊
+- DocumentReference API 失敗時：
+  - Observation 儲存/更新不應被阻斷
+  - 使用者可透過警示得知附件未成功同步
 
 ## 邊界
 
-- 本批次不引入 `Media` / `DocumentReference` UI
-- 本批次不改動 `Practitioner` 模組
+- 本批次已引入 `DocumentReference` URL 型 baseline，不含 binary upload
+- 本批次已在 rekam 流程接入 `Practitioner`，但 doctor 模組仍未全量遷移
 - 不做大幅 UI 改版與破壞性改動
