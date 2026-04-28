@@ -14,8 +14,13 @@
                         </div>
 
                         <div class="mx-10 mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                            Phase 2 adds Condition as primary condition flow. Legacy `kondisi` is still kept as Observation.note fallback.
+                            Phase 2 baseline: Observation + Condition + DocumentReference, with non-blocking fallback.
                         </div>
+                        @if (!empty($practitionerWarning))
+                            <div class="mx-10 mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                Practitioner service warning (non-blocking): {{ $practitionerWarning }}
+                            </div>
+                        @endif
 
                         @if ($pageError)
                             <div class="px-10 pb-10">
@@ -37,6 +42,7 @@
                         @else
                         <form class="px-10 pb-6" action="{{ route('admin.rekam.store') }}" method="POST" data-enhanced-form>
                             @csrf
+
                             <div class="grid md:grid-cols-2 md:gap-6">
                                 <div class="relative z-0 w-full mb-6 group">
                                     <x-input-label for="pasien" :value="__('Patient')" />
@@ -49,22 +55,34 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('pasien')" />
                                 </div>
                                 <div class="relative z-0 w-full mb-6 group">
+                                    <x-input-label for="performer" :value="__('Practitioner (Optional)')" />
+                                    <select name="performer" id="performer" class="block bg-transparent py-2.5 px-0 w-full text-sm border-0 border-b-2 border-gray-300 appearance-none text-gray-500 dark:text-gray-400 dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer">
+                                        <option value="" selected>Unassigned</option>
+                                        @foreach($practitioners as $practitioner)
+                                            <option value="{{ $practitioner->id }}" @selected(old('performer') === $practitioner->id)>{{ $practitioner->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <x-input-error class="mt-2" :messages="$errors->get('performer')" />
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 md:gap-6">
+                                <div class="relative z-0 w-full mb-6 group">
                                     <x-input-label for="effective_datetime" :value="__('Effective Date Time (Optional)')" />
                                     <x-text-input id="effective_datetime" name="effective_datetime" type="datetime-local" class="mt-1 block w-full" :value="old('effective_datetime')" />
                                     <x-input-error class="mt-2" :messages="$errors->get('effective_datetime')" />
                                 </div>
-                            </div>
-
-                            <div class="relative z-0 w-full mb-6 group">
-                                <x-input-label for="suhu" :value="__('Body Temperature (°C)')" />
-                                <x-text-input id="suhu" name="suhu" type="text" class="mt-1 block w-full" :value="old('suhu')" required />
-                                <x-input-error class="mt-2" :messages="$errors->get('suhu')" />
+                                <div class="relative z-0 w-full mb-6 group">
+                                    <x-input-label for="suhu" :value="__('Body Temperature (C)')" />
+                                    <x-text-input id="suhu" name="suhu" type="text" class="mt-1 block w-full" :value="old('suhu')" required />
+                                    <x-input-error class="mt-2" :messages="$errors->get('suhu')" />
+                                </div>
                             </div>
 
                             <div class="relative z-0 w-full mb-6 group">
                                 <x-input-label for="kondisi" :value="__('Legacy Condition Note (Optional)')" />
                                 <x-text-input id="kondisi" name="kondisi" type="text" class="mt-1 block w-full" :value="old('kondisi')" />
-                                <p class="mt-1 text-xs text-amber-700">Legacy field: temporarily stored as Observation.note.</p>
+                                <p class="mt-1 text-xs text-amber-700">Fallback field: stored as Observation.note.</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('kondisi')" />
                             </div>
 
@@ -78,8 +96,9 @@
                                         class="mt-1 block w-full"
                                         :value="old('condition_code')"
                                         maxlength="64"
+                                        pattern="[A-Za-z0-9][A-Za-z0-9._:/-]{0,63}"
                                     />
-                                    <p class="mt-1 text-xs text-slate-600">Backend contract: optional string, max 64 chars. Example: `fever`.</p>
+                                    <p class="mt-1 text-xs text-slate-600">Backend contract: optional string, max 64 chars.</p>
                                     <x-input-error class="mt-2" :messages="$errors->get('condition_code')" />
                                 </div>
                                 <div class="relative z-0 w-full mb-6 group">
@@ -98,9 +117,16 @@
                             </div>
 
                             <div class="relative z-0 w-full mb-6 group">
-                                <x-input-label for="picture_legacy" :value="__('Legacy Picture')" />
-                                <x-text-input id="picture_legacy" name="picture_legacy" type="text" class="mt-1 block w-full bg-gray-100" value="Disabled in Phase 1" disabled />
-                                <p class="mt-1 text-xs text-amber-700">Legacy field disabled in Phase 1.</p>
+                                <x-input-label for="document_reference_title" :value="__('Document Title (Optional)')" />
+                                <x-text-input id="document_reference_title" name="document_reference_title" type="text" class="mt-1 block w-full" :value="old('document_reference_title')" maxlength="120" />
+                                <x-input-error class="mt-2" :messages="$errors->get('document_reference_title')" />
+                            </div>
+
+                            <div class="relative z-0 w-full mb-6 group">
+                                <x-input-label for="document_reference_url" :value="__('Document URL (Optional)')" />
+                                <x-text-input id="document_reference_url" name="document_reference_url" type="url" class="mt-1 block w-full" :value="old('document_reference_url')" maxlength="2048" />
+                                <p class="mt-1 text-xs text-slate-600">Phase 2 Media/DocumentReference baseline: external URL attachment.</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('document_reference_url')" />
                             </div>
 
                             <button type="submit" class="text-white bg-blue-700 mb-3 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">

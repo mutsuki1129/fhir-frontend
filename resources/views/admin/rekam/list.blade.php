@@ -9,11 +9,16 @@
             <div class="py-12">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                        Phase 2 list shows FHIR Observation + Condition summary. Legacy image field remains hidden.
+                        Phase 2 list shows Observation + Condition + DocumentReference state with non-blocking fallback.
                     </div>
                     @if (!empty($conditionWarning))
                         <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                             Condition service warning (non-blocking): {{ $conditionWarning }}
+                        </div>
+                    @endif
+                    @if (!empty($documentReferenceWarning))
+                        <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                            DocumentReference service warning (non-blocking): {{ $documentReferenceWarning }}
                         </div>
                     @endif
 
@@ -34,6 +39,7 @@
                     <div class="container mx-auto gap-8 flex flex-col sm:flex-row flex-wrap">
                         @foreach($rekams as $rekam)
                             @php($condition = $conditionsByPatient->get($rekam->patientId))
+                            @php($documentReference = $documentReferencesByPatient->get($rekam->patientId))
                             <div class="w-96 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                                 <div class="p-5 justify-between">
                                     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -45,6 +51,7 @@
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Performer: {{ $rekam->performerDisplay ?: '-' }}</p>
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Body Temperature: {{ $rekam->valueCelsius }} C</p>
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Effective: {{ $rekam->effectiveDateTime ?: '-' }}</p>
+
                                         @if($condition?->text || $condition?->code)
                                             <p class="font-normal text-xs">
                                                 <span class="inline-flex items-center rounded bg-emerald-100 px-2 py-1 text-emerald-800">Condition available</span>
@@ -60,9 +67,30 @@
                                             <p class="font-normal text-xs">
                                                 <span class="inline-flex items-center rounded bg-amber-100 px-2 py-1 text-amber-800">Fallback: legacy note</span>
                                             </p>
+                                        @else
+                                            <p class="font-normal text-xs">
+                                                <span class="inline-flex items-center rounded bg-slate-100 px-2 py-1 text-slate-700">Condition missing</span>
+                                            </p>
                                         @endif
+
                                         @if($rekam->note)
                                             <p class="font-normal text-xs text-amber-700">Legacy note: {{ $rekam->note }}</p>
+                                        @endif
+
+                                        @if($documentReference?->url)
+                                            <p class="font-normal text-xs">
+                                                <span class="inline-flex items-center rounded bg-sky-100 px-2 py-1 text-sky-800">DocumentReference available</span>
+                                            </p>
+                                            <p class="font-normal text-sm text-gray-700 dark:text-white">
+                                                Document:
+                                                <a href="{{ $documentReference->url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+                                                    {{ $documentReference->title ?: 'Open attachment' }}
+                                                </a>
+                                            </p>
+                                        @else
+                                            <p class="font-normal text-xs">
+                                                <span class="inline-flex items-center rounded bg-slate-100 px-2 py-1 text-slate-700">No document reference</span>
+                                            </p>
                                         @endif
                                     </div>
 
