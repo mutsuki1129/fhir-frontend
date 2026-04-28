@@ -13,7 +13,7 @@
                     </div>
                     @if (!empty($conditionWarning))
                         <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                            {{ $conditionWarning }}
+                            Condition service warning (non-blocking): {{ $conditionWarning }}
                         </div>
                     @endif
 
@@ -46,12 +46,19 @@
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Body Temperature: {{ $rekam->valueCelsius }} C</p>
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Effective: {{ $rekam->effectiveDateTime ?: '-' }}</p>
                                         @if($condition?->text || $condition?->code)
+                                            <p class="font-normal text-xs">
+                                                <span class="inline-flex items-center rounded bg-emerald-100 px-2 py-1 text-emerald-800">Condition available</span>
+                                            </p>
                                             <p class="font-normal text-sm text-gray-700 dark:text-white">
                                                 Condition:
                                                 {{ $condition->text ?: '-' }}
                                                 @if($condition->code)
                                                     <span class="text-xs text-slate-500">({{ $condition->code }})</span>
                                                 @endif
+                                            </p>
+                                        @elseif($rekam->note)
+                                            <p class="font-normal text-xs">
+                                                <span class="inline-flex items-center rounded bg-amber-100 px-2 py-1 text-amber-800">Fallback: legacy note</span>
                                             </p>
                                         @endif
                                         @if($rekam->note)

@@ -71,13 +71,28 @@
                             <div class="grid md:grid-cols-2 md:gap-6">
                                 <div class="relative z-0 w-full mb-6 group">
                                     <x-input-label for="condition_code" :value="__('Condition Code (Optional)')" />
-                                    <x-text-input id="condition_code" name="condition_code" type="text" class="mt-1 block w-full" :value="old('condition_code')" />
-                                    <p class="mt-1 text-xs text-slate-600">Phase 2 field. Example: `fever`.</p>
+                                    <x-text-input
+                                        id="condition_code"
+                                        name="condition_code"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        :value="old('condition_code')"
+                                        maxlength="64"
+                                    />
+                                    <p class="mt-1 text-xs text-slate-600">Backend contract: optional string, max 64 chars. Example: `fever`.</p>
                                     <x-input-error class="mt-2" :messages="$errors->get('condition_code')" />
                                 </div>
                                 <div class="relative z-0 w-full mb-6 group">
                                     <x-input-label for="condition_text" :value="__('Condition Text (Optional)')" />
-                                    <x-text-input id="condition_text" name="condition_text" type="text" class="mt-1 block w-full" :value="old('condition_text')" />
+                                    <x-text-input
+                                        id="condition_text"
+                                        name="condition_text"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        :value="old('condition_text')"
+                                        maxlength="255"
+                                    />
+                                    <p class="mt-1 text-xs text-slate-600">Backend contract: optional string, max 255 chars.</p>
                                     <x-input-error class="mt-2" :messages="$errors->get('condition_text')" />
                                 </div>
                             </div>
