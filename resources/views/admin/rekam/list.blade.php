@@ -9,8 +9,13 @@
             <div class="py-12">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                        Phase 1 view shows FHIR Observation (Body Temperature). Legacy image field is hidden.
+                        Phase 2 list shows FHIR Observation + Condition summary. Legacy image field remains hidden.
                     </div>
+                    @if (!empty($conditionWarning))
+                        <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                            {{ $conditionWarning }}
+                        </div>
+                    @endif
 
                     @if ($pageError)
                         <x-error-state
@@ -21,13 +26,14 @@
                     @elseif($rekams->isEmpty())
                         <x-empty-state
                             title="No temperature observations yet"
-                            message="Create the first temperature observation to continue the Phase 1 Observation flow."
+                            message="Create the first temperature observation to continue the clinical flow."
                             action-label="Add Medical Record"
                             :action-href="route('admin.rekam.create')"
                         />
                     @else
                     <div class="container mx-auto gap-8 flex flex-col sm:flex-row flex-wrap">
                         @foreach($rekams as $rekam)
+                            @php($condition = $conditionsByPatient->get($rekam->patientId))
                             <div class="w-96 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                                 <div class="p-5 justify-between">
                                     <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -37,8 +43,17 @@
 
                                     <div class="mb-3 grid grid-cols-1 gap-3">
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Performer: {{ $rekam->performerDisplay ?: '-' }}</p>
-                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Body Temperature: {{ $rekam->valueCelsius }} °C</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Body Temperature: {{ $rekam->valueCelsius }} C</p>
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Effective: {{ $rekam->effectiveDateTime ?: '-' }}</p>
+                                        @if($condition?->text || $condition?->code)
+                                            <p class="font-normal text-sm text-gray-700 dark:text-white">
+                                                Condition:
+                                                {{ $condition->text ?: '-' }}
+                                                @if($condition->code)
+                                                    <span class="text-xs text-slate-500">({{ $condition->code }})</span>
+                                                @endif
+                                            </p>
+                                        @endif
                                         @if($rekam->note)
                                             <p class="font-normal text-xs text-amber-700">Legacy note: {{ $rekam->note }}</p>
                                         @endif

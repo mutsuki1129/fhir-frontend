@@ -14,8 +14,14 @@
                         </div>
 
                         <div class="mx-10 mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                            Phase 1 updates temperature Observation only. Legacy image is disabled.
+                            Phase 2 supports Condition update with fallback to legacy note. Legacy image remains disabled.
                         </div>
+
+                        @if (!empty($conditionWarning))
+                            <div class="mx-10 mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                {{ $conditionWarning }}
+                            </div>
+                        @endif
 
                         @if ($pageError || !$rekam)
                             <div class="px-10 pb-10">
@@ -38,6 +44,7 @@
                         <form class="px-10 pb-6" method="post" action="{{ route('admin.rekam.update', $rekam->id) }}" data-enhanced-form>
                             @csrf
                             @method('patch')
+                            <input type="hidden" name="condition_id" value="{{ old('condition_id', $condition?->id) }}" />
 
                             <div class="mb-4">
                                 <x-input-label for="pasien" :value="__('Patient')" />
@@ -66,6 +73,18 @@
                                 <x-text-input id="kondisi" name="kondisi" type="text" class="mt-1 block w-full" :value="old('kondisi', $rekam->note)" />
                                 <p class="mt-1 text-xs text-amber-700">Legacy field: temporarily stored as Observation.note.</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('kondisi')" />
+                            </div>
+                            <div class="grid md:grid-cols-2 md:gap-6">
+                                <div class="mb-4">
+                                    <x-input-label for="condition_code" :value="__('Condition Code (Optional)')" />
+                                    <x-text-input id="condition_code" name="condition_code" type="text" class="mt-1 block w-full" :value="old('condition_code', $condition?->code)" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('condition_code')" />
+                                </div>
+                                <div class="mb-4">
+                                    <x-input-label for="condition_text" :value="__('Condition Text (Optional)')" />
+                                    <x-text-input id="condition_text" name="condition_text" type="text" class="mt-1 block w-full" :value="old('condition_text', $condition?->text)" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('condition_text')" />
+                                </div>
                             </div>
                             <div class="mb-4">
                                 <x-input-label for="picture_legacy" :value="__('Legacy Picture')" />

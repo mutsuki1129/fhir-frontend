@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Services\Fhir\FhirApiClient;
 use App\Services\Fhir\FhirApiException;
+use App\Support\Fhir\ConditionMapper;
 use App\Support\Fhir\ObservationMapper;
 use App\Support\Fhir\PatientMapper;
+use App\ViewModels\ConditionVM;
 use App\ViewModels\TemperatureObservationVM;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -25,6 +27,8 @@ class RekamController extends Controller
             'suhu' => 'required|numeric|between:35,45.5',
             'effective_datetime' => 'nullable|date',
             'kondisi' => 'nullable|string|max:255',
+            'condition_code' => 'nullable|string|max:64',
+            'condition_text' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -41,7 +45,19 @@ class RekamController extends Controller
             $payload = ObservationMapper::toFhirObservation($observationVm);
             $this->fhirApiClient->create('Observation', $payload);
 
-            return redirect()->route('admin.rekam.list')->with('status', 'Temperature observation created successfully.');
+            $conditionError = $this->syncConditionForPatient(
+                patientId: $validated['pasien'],
+                conditionCode: $validated['condition_code'] ?? null,
+                conditionText: $validated['condition_text'] ?? null,
+                conditionId: null,
+            );
+
+            $redirect = redirect()->route('admin.rekam.list')->with('status', 'Temperature observation created successfully.');
+            if ($conditionError) {
+                return $redirect->withErrors(['condition' => $conditionError]);
+            }
+
+            return $redirect;
         } catch (FhirApiException $exception) {
             return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
         } catch (Throwable $exception) {
@@ -62,10 +78,15 @@ class RekamController extends Controller
     public function show(): View
     {
         $observationResult = $this->fetchTemperatureObservationsResult();
+        $conditionResult = $this->fetchLatestConditionsByPatientIds(
+            $observationResult['items']->pluck('patientId')->filter()->unique()->values()->all()
+        );
 
         return view('admin.rekam.list', [
             'rekams' => $observationResult['items'],
             'pageError' => $observationResult['error'],
+            'conditionsByPatient' => $conditionResult['items'],
+            'conditionWarning' => $conditionResult['error'],
         ]);
     }
 
@@ -75,10 +96,15 @@ class RekamController extends Controller
         $rekams = $observationResult['items']
             ->sortBy(fn (TemperatureObservationVM $item) => mb_strtolower($item->patientDisplay ?? $item->patientId))
             ->values();
+        $conditionResult = $this->fetchLatestConditionsByPatientIds(
+            $rekams->pluck('patientId')->filter()->unique()->values()->all()
+        );
 
         return view('admin.rekam.pasien', [
             'rekams' => $rekams,
             'pageError' => $observationResult['error'],
+            'conditionsByPatient' => $conditionResult['items'],
+            'conditionWarning' => $conditionResult['error'],
         ]);
     }
 
@@ -88,10 +114,15 @@ class RekamController extends Controller
         $rekams = $observationResult['items']
             ->sortBy(fn (TemperatureObservationVM $item) => mb_strtolower($item->performerDisplay ?? ''))
             ->values();
+        $conditionResult = $this->fetchLatestConditionsByPatientIds(
+            $rekams->pluck('patientId')->filter()->unique()->values()->all()
+        );
 
         return view('admin.rekam.dokter', [
             'rekams' => $rekams,
             'pageError' => $observationResult['error'],
+            'conditionsByPatient' => $conditionResult['items'],
+            'conditionWarning' => $conditionResult['error'],
         ]);
     }
 
@@ -102,12 +133,16 @@ class RekamController extends Controller
         try {
             $resource = $this->fhirApiClient->read('Observation', (string) $id);
             $rekam = ObservationMapper::fromFhirObservation($resource);
+            $conditionResult = $this->fetchLatestConditionsByPatientIds([$rekam->patientId]);
+            $condition = $conditionResult['items']->get($rekam->patientId);
 
             return view('admin.rekam.edit', [
                 'title' => 'Edit Medical Record',
                 'rekam' => $rekam,
                 'pasiens' => $patientResult['items'],
                 'pageError' => $patientResult['error'],
+                'condition' => $condition,
+                'conditionWarning' => $conditionResult['error'],
             ]);
         } catch (FhirApiException $exception) {
             return view('admin.rekam.edit', [
@@ -115,6 +150,8 @@ class RekamController extends Controller
                 'rekam' => null,
                 'pasiens' => $patientResult['items'],
                 'pageError' => $exception->getMessage(),
+                'condition' => null,
+                'conditionWarning' => null,
             ]);
         } catch (Throwable $exception) {
             return view('admin.rekam.edit', [
@@ -122,6 +159,8 @@ class RekamController extends Controller
                 'rekam' => null,
                 'pasiens' => $patientResult['items'],
                 'pageError' => 'Unable to load observation at this time.',
+                'condition' => null,
+                'conditionWarning' => null,
             ]);
         }
     }
@@ -146,6 +185,9 @@ class RekamController extends Controller
             'suhu' => 'required|numeric|between:35,45.5',
             'effective_datetime' => 'nullable|date',
             'kondisi' => 'nullable|string|max:255',
+            'condition_id' => 'nullable|string',
+            'condition_code' => 'nullable|string|max:64',
+            'condition_text' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -163,7 +205,19 @@ class RekamController extends Controller
             $payload = ObservationMapper::toFhirObservation($observationVm);
             $this->fhirApiClient->update('Observation', (string) $id, $payload);
 
-            return redirect()->route('admin.rekam.list')->with('status', 'Temperature observation updated successfully.');
+            $conditionError = $this->syncConditionForPatient(
+                patientId: $validated['pasien'],
+                conditionCode: $validated['condition_code'] ?? null,
+                conditionText: $validated['condition_text'] ?? null,
+                conditionId: $validated['condition_id'] ?? null,
+            );
+
+            $redirect = redirect()->route('admin.rekam.list')->with('status', 'Temperature observation updated successfully.');
+            if ($conditionError) {
+                return $redirect->withErrors(['condition' => $conditionError]);
+            }
+
+            return $redirect;
         } catch (FhirApiException $exception) {
             return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
         } catch (Throwable $exception) {
@@ -316,5 +370,112 @@ class RekamController extends Controller
 
         $composed = trim("{$givenText} {$family}");
         return $composed !== '' ? $composed : (string) ($resource['id'] ?? '');
+    }
+
+    /**
+     * @param array<int, string> $patientIds
+     * @return array{items: Collection<string, ConditionVM>, error: ?string}
+     */
+    private function fetchLatestConditionsByPatientIds(array $patientIds): array
+    {
+        $uniquePatientIds = array_values(array_unique(array_filter(array_map('strval', $patientIds))));
+        if ($uniquePatientIds === []) {
+            return [
+                'items' => collect(),
+                'error' => null,
+            ];
+        }
+
+        try {
+            $bundle = $this->fhirApiClient->search('Condition', ['_count' => 200]);
+            $entries = $bundle['entry'] ?? [];
+            if (!is_array($entries)) {
+                return [
+                    'items' => collect(),
+                    'error' => null,
+                ];
+            }
+
+            $patientIdIndex = array_fill_keys($uniquePatientIds, true);
+            $latestByPatient = [];
+
+            foreach ($entries as $entry) {
+                $resource = $entry['resource'] ?? null;
+                if (!is_array($resource) || ($resource['resourceType'] ?? null) !== 'Condition') {
+                    continue;
+                }
+
+                $condition = ConditionMapper::fromFhirCondition($resource);
+                if (!isset($patientIdIndex[$condition->patientId])) {
+                    continue;
+                }
+
+                $candidateTime = $condition->recordedDate
+                    ?? (string) data_get($resource, 'meta.lastUpdated', '');
+                $current = $latestByPatient[$condition->patientId] ?? null;
+                if (!$current) {
+                    $latestByPatient[$condition->patientId] = ['vm' => $condition, 'time' => $candidateTime];
+                    continue;
+                }
+
+                $currentTime = (string) ($current['time'] ?? '');
+                if ($candidateTime !== '' && ($currentTime === '' || strcmp($candidateTime, $currentTime) >= 0)) {
+                    $latestByPatient[$condition->patientId] = ['vm' => $condition, 'time' => $candidateTime];
+                }
+            }
+
+            return [
+                'items' => collect($latestByPatient)->mapWithKeys(
+                    fn (array $value, string $patientId) => [$patientId => $value['vm']]
+                ),
+                'error' => null,
+            ];
+        } catch (FhirApiException $exception) {
+            return [
+                'items' => collect(),
+                'error' => $exception->getMessage(),
+            ];
+        } catch (Throwable $exception) {
+            return [
+                'items' => collect(),
+                'error' => 'Condition service is unavailable. Using legacy note fallback.',
+            ];
+        }
+    }
+
+    private function syncConditionForPatient(
+        string $patientId,
+        ?string $conditionCode,
+        ?string $conditionText,
+        ?string $conditionId,
+    ): ?string {
+        $code = trim((string) $conditionCode);
+        $text = trim((string) $conditionText);
+
+        if ($code === '' && $text === '') {
+            return null;
+        }
+
+        $conditionVm = new ConditionVM(
+            id: trim((string) $conditionId),
+            patientId: $patientId,
+            code: $code !== '' ? $code : null,
+            text: $text !== '' ? $text : null,
+        );
+
+        try {
+            $payload = ConditionMapper::toFhirCondition($conditionVm);
+            if ($conditionVm->id !== '') {
+                $this->fhirApiClient->update('Condition', $conditionVm->id, $payload);
+            } else {
+                $this->fhirApiClient->create('Condition', $payload);
+            }
+
+            return null;
+        } catch (FhirApiException $exception) {
+            return 'Condition sync unavailable right now. Observation was saved, and legacy note remains available.';
+        } catch (Throwable $exception) {
+            return 'Condition sync failed unexpectedly. Observation was saved, and legacy note remains available.';
+        }
     }
 }
