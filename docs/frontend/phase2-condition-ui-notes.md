@@ -60,6 +60,12 @@
   - Observation 儲存/更新不應被阻斷
   - 使用者可透過警示得知附件未成功同步
 
+## 測試現況
+
+- 已有 smoke script 驗證 Condition create/update/list 成功路徑：
+  - `scripts/phase2-condition-smoke.ps1`
+- Condition API 失敗路徑的自動化測試目前 deferred（需後端提供可控故障注入契約）。
+
 ## 邊界
 
 - 本批次已引入 `DocumentReference` URL 型 baseline，不含 binary upload
