@@ -8,6 +8,12 @@ use Illuminate\Support\Str;
 class PatientMapper
 {
     /**
+     * Phase 3 field-sync baseline note:
+     * current mapper focuses on name + telecom + optional photo.
+     * Extended fields from patient-intake baseline (birthDate, multi-identifier, generalPractitioner)
+     * are tracked in docs/frontend/phase3-field-sync-baseline.md for incremental rollout.
+     */
+    /**
      * @param array<string, mixed> $resource
      */
     public static function fromFhirPatient(array $resource): PatientVM

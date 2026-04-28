@@ -7,6 +7,12 @@ use Carbon\CarbonImmutable;
 
 class ObservationMapper
 {
+    /**
+     * Phase 3 field-sync baseline note:
+     * this mapper intentionally handles the temperature observation subset used by rekam pages.
+     * Patient-intake observations (valueString/valueCodeableConcept/component) are tracked
+     * in docs/frontend/phase3-field-sync-baseline.md for later incremental mapper expansion.
+     */
     private const LOINC_BODY_TEMPERATURE = '8310-5';
 
     /**

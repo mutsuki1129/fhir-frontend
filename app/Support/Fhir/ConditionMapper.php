@@ -8,6 +8,11 @@ use Carbon\CarbonImmutable;
 class ConditionMapper
 {
     /**
+     * Phase 3 field-sync baseline note:
+     * condition fields here match the current rekam UI baseline (code/text/recordedDate/note).
+     * If backend profile adds mandatory elements, update mapper and baseline document together.
+     */
+    /**
      * @param array<string, mixed> $resource
      */
     public static function fromFhirCondition(array $resource): ConditionVM

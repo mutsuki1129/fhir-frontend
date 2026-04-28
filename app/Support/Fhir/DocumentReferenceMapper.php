@@ -8,6 +8,11 @@ use Carbon\CarbonImmutable;
 class DocumentReferenceMapper
 {
     /**
+     * Phase 3 field-sync baseline note:
+     * current baseline is URL-based attachment mapping.
+     * Binary upload and secure retrieval policy remain Phase 3 follow-up items.
+     */
+    /**
      * @param array<string, mixed> $resource
      */
     public static function fromFhirDocumentReference(array $resource): DocumentReferenceVM

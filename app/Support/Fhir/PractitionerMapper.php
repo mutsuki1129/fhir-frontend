@@ -7,6 +7,12 @@ use App\ViewModels\PractitionerVM;
 class PractitionerMapper
 {
     /**
+     * Phase 3 field-sync baseline note:
+     * mapper currently normalizes id/name/telecom for rekam performer selection.
+     * Additional doctor-module fields should follow the baseline mapping document
+     * before full practitioner module migration.
+     */
+    /**
      * @param array<string, mixed> $resource
      */
     public static function fromFhirPractitioner(array $resource): PractitionerVM
