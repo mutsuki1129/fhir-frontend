@@ -111,7 +111,7 @@ class ObservationMapper
 
     /**
      * Determine whether an Observation is usable on rekam pages.
-     * We keep this broad to avoid dropping newly-added observation shapes.
+     * Keep this strict to avoid non-clinical noise entering rekam list.
      *
      * @param array<string, mixed> $resource
      */
@@ -122,17 +122,15 @@ class ObservationMapper
             return false;
         }
 
-        if (self::extractTemperatureValue($resource) !== 0.0) {
+        if (self::hasBodyTemperatureCode($resource)) {
             return true;
         }
 
-        $valueString = (string) data_get($resource, 'valueString', '');
-        if (trim($valueString) !== '') {
+        if (self::hasCelsiusQuantity($resource)) {
             return true;
         }
 
-        $note = (string) data_get($resource, 'note.0.text', '');
-        return trim($note) !== '';
+        return self::hasCelsiusComponent($resource);
     }
 
     /**
@@ -169,6 +167,74 @@ class ObservationMapper
         }
 
         return 0.0;
+    }
+
+    /**
+     * @param array<string, mixed> $resource
+     */
+    private static function hasBodyTemperatureCode(array $resource): bool
+    {
+        $codings = data_get($resource, 'code.coding', []);
+        if (!is_array($codings)) {
+            return false;
+        }
+
+        foreach ($codings as $coding) {
+            if (!is_array($coding)) {
+                continue;
+            }
+            if ((string) ($coding['code'] ?? '') === self::LOINC_BODY_TEMPERATURE) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array<string, mixed> $resource
+     */
+    private static function hasCelsiusQuantity(array $resource): bool
+    {
+        $unit = mb_strtolower((string) data_get($resource, 'valueQuantity.unit', ''));
+        $code = mb_strtolower((string) data_get($resource, 'valueQuantity.code', ''));
+
+        return in_array($code, ['cel', 'c'], true)
+            || in_array($unit, ['cel', 'c', 'celsius', '°c'], true);
+    }
+
+    /**
+     * @param array<string, mixed> $resource
+     */
+    private static function hasCelsiusComponent(array $resource): bool
+    {
+        $components = data_get($resource, 'component', []);
+        if (!is_array($components)) {
+            return false;
+        }
+
+        foreach ($components as $component) {
+            if (!is_array($component)) {
+                continue;
+            }
+
+            $codingList = data_get($component, 'code.coding', []);
+            if (is_array($codingList)) {
+                foreach ($codingList as $coding) {
+                    if (is_array($coding) && (string) ($coding['code'] ?? '') === self::LOINC_BODY_TEMPERATURE) {
+                        return true;
+                    }
+                }
+            }
+
+            $unit = mb_strtolower((string) data_get($component, 'valueQuantity.unit', ''));
+            $code = mb_strtolower((string) data_get($component, 'valueQuantity.code', ''));
+            if (in_array($code, ['cel', 'c'], true) || in_array($unit, ['cel', 'c', 'celsius', '°c'], true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static function extractIdFromReference(string $reference): string
