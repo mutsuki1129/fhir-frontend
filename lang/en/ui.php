@@ -49,5 +49,6 @@ return [
     'error.network' => 'Unable to reach the FHIR service right now. Please try again later.',
     'error.timeout' => 'The request timed out. Please try again.',
     'error.validation' => 'Please review the highlighted fields and try again.',
+    'error.not_found' => 'Requested clinical resource was not found.',
     'error.unknown' => 'Unexpected error occurred. Please try again.',
 ];

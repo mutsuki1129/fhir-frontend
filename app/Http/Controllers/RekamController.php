@@ -76,7 +76,7 @@ class RekamController extends Controller
 
             return $redirect;
         } catch (FhirApiException $exception) {
-            return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
+            return back()->withInput()->withErrors(['fhir' => $this->mapFhirError($exception)]);
         } catch (Throwable $exception) {
             return back()->withInput()->withErrors(['fhir' => 'Unable to create observation at this time.']);
         }
@@ -183,7 +183,7 @@ class RekamController extends Controller
                 'rekam' => null,
                 'pasiens' => $patientResult['items'],
                 'practitioners' => $practitionerResult['items'],
-                'pageError' => $exception->getMessage(),
+                'pageError' => $this->mapFhirError($exception),
                 'practitionerWarning' => $practitionerResult['error'],
                 'condition' => null,
                 'conditionWarning' => null,
@@ -213,7 +213,7 @@ class RekamController extends Controller
 
             return redirect()->route('admin.rekam.list')->with('status', 'Temperature observation deleted successfully.');
         } catch (FhirApiException $exception) {
-            return redirect()->route('admin.rekam.list')->withErrors(['fhir' => $exception->getMessage()]);
+            return redirect()->route('admin.rekam.list')->withErrors(['fhir' => $this->mapFhirError($exception)]);
         } catch (Throwable $exception) {
             return redirect()->route('admin.rekam.list')->withErrors(['fhir' => 'Unable to delete observation at this time.']);
         }
@@ -274,7 +274,7 @@ class RekamController extends Controller
 
             return $redirect;
         } catch (FhirApiException $exception) {
-            return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
+            return back()->withInput()->withErrors(['fhir' => $this->mapFhirError($exception)]);
         } catch (Throwable $exception) {
             return back()->withInput()->withErrors(['fhir' => 'Unable to update observation at this time.']);
         }
@@ -315,7 +315,7 @@ class RekamController extends Controller
         } catch (FhirApiException $exception) {
             return [
                 'items' => collect(),
-                'error' => $exception->getMessage(),
+                'error' => $this->mapFhirError($exception),
             ];
         } catch (Throwable $exception) {
             return [
@@ -352,7 +352,7 @@ class RekamController extends Controller
         } catch (FhirApiException $exception) {
             return [
                 'items' => collect(),
-                'error' => $exception->getMessage(),
+                'error' => $this->mapFhirError($exception),
             ];
         } catch (Throwable $exception) {
             return [
@@ -425,7 +425,7 @@ class RekamController extends Controller
         } catch (FhirApiException $exception) {
             return [
                 'items' => collect(),
-                'error' => $exception->getMessage(),
+                'error' => $this->mapFhirError($exception),
             ];
         } catch (Throwable $exception) {
             return [
@@ -464,7 +464,7 @@ class RekamController extends Controller
                     $items->put($patientId, $latest);
                 }
             } catch (FhirApiException $exception) {
-                $errorMessage = $errorMessage ?? $exception->getMessage();
+                $errorMessage = $errorMessage ?? $this->mapFhirError($exception);
             } catch (Throwable $exception) {
                 $errorMessage = $errorMessage ?? 'Condition service is unavailable. Using legacy note fallback.';
             }
@@ -523,7 +523,7 @@ class RekamController extends Controller
                     $items->put($patientId, $latest);
                 }
             } catch (FhirApiException $exception) {
-                $errorMessage = $errorMessage ?? $exception->getMessage();
+                $errorMessage = $errorMessage ?? $this->mapFhirError($exception);
             } catch (Throwable $exception) {
                 $errorMessage = $errorMessage ?? 'DocumentReference service is unavailable. Continue using legacy fallback.';
             }
@@ -652,5 +652,16 @@ class RekamController extends Controller
     private static function emptyToNull(string $value): ?string
     {
         return $value !== '' ? $value : null;
+    }
+
+    private function mapFhirError(FhirApiException $exception): string
+    {
+        return match ($exception->errorKey()) {
+            'UNAUTHORIZED' => __('ui.error.unauthorized'),
+            'FORBIDDEN' => __('ui.error.forbidden'),
+            'PATIENT_NOT_FOUND', 'OBSERVATION_NOT_FOUND' => __('ui.error.not_found'),
+            'VALIDATION_ERROR' => __('ui.error.validation'),
+            default => $exception->getMessage(),
+        };
     }
 }

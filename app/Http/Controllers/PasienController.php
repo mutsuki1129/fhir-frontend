@@ -44,7 +44,7 @@ class PasienController extends Controller
 
             return redirect()->route('pasiens.list')->with('status', 'Patient created successfully');
         } catch (FhirApiException $exception) {
-            return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
+            return back()->withInput()->withErrors(['fhir' => $this->mapFhirError($exception)]);
         } catch (Throwable $exception) {
             return back()->withInput()->withErrors(['fhir' => 'Unable to create patient at this time.']);
         }
@@ -74,7 +74,7 @@ class PasienController extends Controller
                 'pasiens' => $this->paginateCollection(collect(), 1, 9),
                 'query' => (string) $request->input('query', ''),
                 'sort_by' => (string) $request->input('sort_by', 'name_asc'),
-                'pageError' => $exception->getMessage(),
+                'pageError' => $this->mapFhirError($exception),
             ]);
         } catch (Throwable $exception) {
             return view('admin.pasiens', [
@@ -102,7 +102,7 @@ class PasienController extends Controller
             return view('admin.editPasien', [
                 'title' => 'Edit Patient',
                 'pasien' => null,
-                'pageError' => $exception->getMessage(),
+                'pageError' => $this->mapFhirError($exception),
             ]);
         } catch (Throwable $exception) {
             return view('admin.editPasien', [
@@ -135,7 +135,7 @@ class PasienController extends Controller
 
             return redirect()->route('pasiens.list')->with('status', 'Patient updated successfully');
         } catch (FhirApiException $exception) {
-            return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
+            return back()->withInput()->withErrors(['fhir' => $this->mapFhirError($exception)]);
         } catch (Throwable $exception) {
             return back()->withInput()->withErrors(['fhir' => 'Unable to update patient at this time.']);
         }
@@ -210,5 +210,16 @@ class PasienController extends Controller
                 'query' => request()->query(),
             ]
         );
+    }
+
+    private function mapFhirError(FhirApiException $exception): string
+    {
+        return match ($exception->errorKey()) {
+            'UNAUTHORIZED' => __('ui.error.unauthorized'),
+            'FORBIDDEN' => __('ui.error.forbidden'),
+            'PATIENT_NOT_FOUND', 'OBSERVATION_NOT_FOUND' => __('ui.error.not_found'),
+            'VALIDATION_ERROR' => __('ui.error.validation'),
+            default => $exception->getMessage(),
+        };
     }
 }

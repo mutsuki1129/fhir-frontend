@@ -48,7 +48,7 @@ class DokterController extends Controller
 
             return redirect()->route('dokters.list')->with('status', 'Practitioner created successfully. Non-FHIR doctor profile fields are deferred.');
         } catch (FhirApiException $exception) {
-            return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
+            return back()->withInput()->withErrors(['fhir' => $this->mapFhirError($exception)]);
         } catch (Throwable $exception) {
             return back()->withInput()->withErrors(['fhir' => 'Unable to create practitioner at this time.']);
         }
@@ -99,7 +99,7 @@ class DokterController extends Controller
                 'dokters' => $this->paginateCollection(collect(), 1, $perPage, $request),
                 'query' => $queryText,
                 'sort_by' => $sortBy,
-            ])->withErrors(['fhir' => $exception->getMessage()]);
+            ])->withErrors(['fhir' => $this->mapFhirError($exception)]);
         } catch (Throwable $exception) {
             return view('admin.dokters', [
                 'title' => 'Doctors',
@@ -122,7 +122,7 @@ class DokterController extends Controller
                 'dokter' => $dokter,
             ]);
         } catch (FhirApiException $exception) {
-            return redirect()->route('dokters.list')->withErrors(['fhir' => $exception->getMessage()]);
+            return redirect()->route('dokters.list')->withErrors(['fhir' => $this->mapFhirError($exception)]);
         } catch (Throwable $exception) {
             return redirect()->route('dokters.list')->withErrors(['fhir' => 'Unable to load practitioner for edit.']);
         }
@@ -151,7 +151,7 @@ class DokterController extends Controller
 
             return redirect()->route('dokters.list')->with('status', 'Practitioner updated successfully. Non-FHIR doctor profile fields are deferred.');
         } catch (FhirApiException $exception) {
-            return back()->withInput()->withErrors(['fhir' => $exception->getMessage()]);
+            return back()->withInput()->withErrors(['fhir' => $this->mapFhirError($exception)]);
         } catch (Throwable $exception) {
             return back()->withInput()->withErrors(['fhir' => 'Unable to update practitioner at this time.']);
         }
@@ -169,7 +169,7 @@ class DokterController extends Controller
 
             return redirect()->route('dokters.list')->with('status', 'Practitioner deleted successfully.');
         } catch (FhirApiException $exception) {
-            return redirect()->route('dokters.list')->withErrors(['fhir' => $exception->getMessage()]);
+            return redirect()->route('dokters.list')->withErrors(['fhir' => $this->mapFhirError($exception)]);
         } catch (Throwable $exception) {
             return redirect()->route('dokters.list')->withErrors(['fhir' => 'Unable to delete practitioner at this time.']);
         }
@@ -225,5 +225,16 @@ class DokterController extends Controller
     {
         $trimmed = trim($value);
         return $trimmed !== '' ? $trimmed : null;
+    }
+
+    private function mapFhirError(FhirApiException $exception): string
+    {
+        return match ($exception->errorKey()) {
+            'UNAUTHORIZED' => __('ui.error.unauthorized'),
+            'FORBIDDEN' => __('ui.error.forbidden'),
+            'PATIENT_NOT_FOUND', 'OBSERVATION_NOT_FOUND' => __('ui.error.not_found'),
+            'VALIDATION_ERROR' => __('ui.error.validation'),
+            default => $exception->getMessage(),
+        };
     }
 }

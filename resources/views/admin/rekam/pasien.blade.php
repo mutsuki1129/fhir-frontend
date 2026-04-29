@@ -59,9 +59,9 @@ $previousPatient = null;
                                                     <p class="font-normal text-sm text-gray-700 dark:text-white">Body Temperature: {{ $rekamInner->valueCelsius }} C</p>
                                                     <p class="font-normal text-sm text-gray-700 dark:text-white">Effective: {{ $rekamInner->effectiveDateTime ?: '-' }}</p>
 
-                                                    @if($condition?->text || $condition?->code)
+                                                    @if($condition?->id && ($condition?->text || $condition?->code))
                                                         <p class="font-normal text-xs">
-                                                            <span class="inline-flex items-center rounded bg-emerald-100 px-2 py-1 text-emerald-800">Condition available</span>
+                                                            <span class="inline-flex items-center rounded bg-emerald-100 px-2 py-1 text-emerald-800">Linked condition</span>
                                                         </p>
                                                         <p class="font-normal text-sm text-gray-700 dark:text-white">
                                                             Condition:
@@ -84,9 +84,19 @@ $previousPatient = null;
                                                         <p class="font-normal text-xs text-amber-700">Legacy note: {{ $rekamInner->note }}</p>
                                                     @endif
 
-                                                    @if($documentReference?->url)
+                                                    @if($documentReference?->id && $documentReference?->url)
                                                         <p class="font-normal text-xs">
-                                                            <span class="inline-flex items-center rounded bg-sky-100 px-2 py-1 text-sky-800">DocumentReference available</span>
+                                                            <span class="inline-flex items-center rounded bg-sky-100 px-2 py-1 text-sky-800">Linked document reference</span>
+                                                        </p>
+                                                        <p class="font-normal text-sm text-gray-700 dark:text-white">
+                                                            Document:
+                                                            <a href="{{ $documentReference->url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+                                                                {{ $documentReference->title ?: 'Open attachment' }}
+                                                            </a>
+                                                        </p>
+                                                    @elseif($documentReference?->url)
+                                                        <p class="font-normal text-xs">
+                                                            <span class="inline-flex items-center rounded bg-amber-100 px-2 py-1 text-amber-800">Fallback document reference</span>
                                                         </p>
                                                         <p class="font-normal text-sm text-gray-700 dark:text-white">
                                                             Document:
