@@ -1,4 +1,4 @@
-# Phase 3 Frontend Release Readiness (M6~M7)
+# Phase 3 Frontend Release Readiness (M6~M8)
 
 ## Summary
 
@@ -8,6 +8,38 @@ This batch completed:
 
 - M6 regression acceptance pass (checklist-based)
 - M7 release convergence documentation
+- M8 connected-environment smoke verification
+
+## M8 Final Verification (Connected Environment)
+
+Verification date: **April 29, 2026 (Asia/Taipei)**
+Target environment: `http://127.0.0.1:8080` via docker-compose stack
+Login account used: `muhdaffa2410@gmail.com` (seeded admin)
+
+### Final Result
+
+- **PASS** (with known deferred/non-blocking limits unchanged from M7)
+
+### Evidence Snapshot
+
+1. Authentication:
+   - Login request succeeded and authenticated session accessed protected pages.
+2. Core page flow status:
+   - `/rekam` -> HTTP 200
+   - `/pasiens` -> HTTP 200
+   - `/dokters` -> HTTP 200
+3. i18n switching:
+   - Switched to `zh_TW`: English patients title/search placeholder hidden
+   - Switched back to `en`: `Patients List` and `Search name, email, phone` visible
+4. Medical-record linkage consistency:
+   - `Linkage note` present
+   - Condition state badge set present
+   - DocumentReference state badge set present
+
+### Notes on M8 Coverage Boundaries
+
+- Runtime checks were executed in connected environment for authenticated key routes and locale switching.
+- Error/empty/loading *display mechanisms* remain implemented and verified at code/template level; this run did not force backend outage or full empty dataset reset in the shared environment.
 
 ## M6 Regression Acceptance Result
 

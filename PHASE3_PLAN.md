@@ -67,6 +67,12 @@ Build a stable frontend integration layer on top of existing Phase 1/2 behavior,
 - [x] Added release readiness report: `docs/frontend/phase3-release-readiness.md`
 - [x] Updated Phase 3 status and deferred-risk ledger for freeze handoff
 
+### M8 (Completed in this batch - final verification)
+
+- [x] Executed connected-environment smoke checks against `/rekam`, `/pasiens`, `/dokters`
+- [x] Verified locale switch behavior (`en` <-> `zh_TW`) on key patient flow
+- [x] Updated release readiness with PASS result and evidence snapshot
+
 ## Risks
 
 - Existing views mix literal strings and translation calls, so full migration should be incremental
