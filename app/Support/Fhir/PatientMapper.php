@@ -7,6 +7,16 @@ use Illuminate\Support\Str;
 
 class PatientMapper
 {
+    private const EXT_EDUCATION = 'urn:tw:patient:education';
+    private const EXT_OCCUPATION = 'urn:tw:patient:occupation';
+    private const EXT_INCOME = 'urn:tw:patient:income';
+    private const EXT_EXPENSE = 'urn:tw:patient:expense';
+    private const EXT_INTERESTS = 'urn:tw:patient:interests';
+    private const EXT_PSYCHOLOGICAL = 'urn:tw:patient:psychological-traits';
+    private const EXT_BEHAVIOR = 'urn:tw:patient:behavior-patterns';
+    private const EXT_BIOMARKERS = 'urn:tw:patient:biomarkers';
+    private const ID_SYSTEM_NATIONAL = 'urn:tw:national-id';
+    private const ID_SYSTEM_NHI = 'urn:tw:nhi-card';
     /**
      * Phase 3 field-sync baseline note:
      * current mapper focuses on name + telecom + optional photo.
@@ -55,12 +65,37 @@ class PatientMapper
             $photoUrl = $photo['url'];
         }
 
+        $generalPractitionerId = null;
+        $generalPractitionerDisplay = null;
+        $gpRef = $resource['generalPractitioner'][0]['reference'] ?? null;
+        if (is_string($gpRef) && str_starts_with($gpRef, 'Practitioner/')) {
+            $generalPractitionerId = substr($gpRef, strlen('Practitioner/'));
+        }
+        $gpDisplay = $resource['generalPractitioner'][0]['display'] ?? null;
+        if (is_string($gpDisplay) && $gpDisplay !== '') {
+            $generalPractitionerDisplay = $gpDisplay;
+        }
+
         return new PatientVM(
             id: (string) ($resource['id'] ?? ''),
             name: $name,
             email: $email,
             phone: $phone,
             photoUrl: $photoUrl,
+            birthDate: self::asString($resource['birthDate'] ?? null),
+            gender: self::asString($resource['gender'] ?? null),
+            education: self::extractExtensionString($resource, self::EXT_EDUCATION),
+            occupation: self::extractExtensionString($resource, self::EXT_OCCUPATION),
+            income: self::extractExtensionString($resource, self::EXT_INCOME),
+            expense: self::extractExtensionString($resource, self::EXT_EXPENSE),
+            interests: self::extractExtensionString($resource, self::EXT_INTERESTS),
+            psychologicalTraits: self::extractExtensionString($resource, self::EXT_PSYCHOLOGICAL),
+            behaviorPatterns: self::extractExtensionString($resource, self::EXT_BEHAVIOR),
+            biomarkers: self::extractExtensionString($resource, self::EXT_BIOMARKERS),
+            nationalId: self::extractIdentifierBySystem($resource, self::ID_SYSTEM_NATIONAL),
+            nhiCardNumber: self::extractIdentifierBySystem($resource, self::ID_SYSTEM_NHI),
+            generalPractitionerId: $generalPractitionerId,
+            generalPractitionerDisplay: $generalPractitionerDisplay,
         );
     }
 
@@ -76,12 +111,7 @@ class PatientMapper
 
         $resource = [
             'resourceType' => 'Patient',
-            'identifier' => [
-                [
-                    'system' => $identifierSystem,
-                    'value' => $identifierValue,
-                ],
-            ],
+            'identifier' => [],
             'name' => [
                 [
                     'text' => $vm->name,
@@ -93,6 +123,23 @@ class PatientMapper
 
         if ($vm->id !== '') {
             $resource['id'] = $vm->id;
+        }
+
+        $resource['identifier'][] = [
+            'system' => $identifierSystem,
+            'value' => $identifierValue,
+        ];
+        if ($vm->nationalId) {
+            $resource['identifier'][] = [
+                'system' => self::ID_SYSTEM_NATIONAL,
+                'value' => $vm->nationalId,
+            ];
+        }
+        if ($vm->nhiCardNumber) {
+            $resource['identifier'][] = [
+                'system' => self::ID_SYSTEM_NHI,
+                'value' => $vm->nhiCardNumber,
+            ];
         }
 
         if ($vm->email) {
@@ -114,6 +161,33 @@ class PatientMapper
             $resource['photo'] = [
                 ['url' => $vm->photoUrl],
             ];
+        }
+        if ($vm->birthDate) {
+            $resource['birthDate'] = $vm->birthDate;
+        }
+        if ($vm->gender) {
+            $resource['gender'] = $vm->gender;
+        }
+        if ($vm->generalPractitionerId) {
+            $resource['generalPractitioner'] = [[
+                'reference' => 'Practitioner/' . $vm->generalPractitionerId,
+            ]];
+            if ($vm->generalPractitionerDisplay) {
+                $resource['generalPractitioner'][0]['display'] = $vm->generalPractitionerDisplay;
+            }
+        }
+
+        $extensions = [];
+        self::pushStringExtension($extensions, self::EXT_EDUCATION, $vm->education);
+        self::pushStringExtension($extensions, self::EXT_OCCUPATION, $vm->occupation);
+        self::pushStringExtension($extensions, self::EXT_INCOME, $vm->income);
+        self::pushStringExtension($extensions, self::EXT_EXPENSE, $vm->expense);
+        self::pushStringExtension($extensions, self::EXT_INTERESTS, $vm->interests);
+        self::pushStringExtension($extensions, self::EXT_PSYCHOLOGICAL, $vm->psychologicalTraits);
+        self::pushStringExtension($extensions, self::EXT_BEHAVIOR, $vm->behaviorPatterns);
+        self::pushStringExtension($extensions, self::EXT_BIOMARKERS, $vm->biomarkers);
+        if ($extensions !== []) {
+            $resource['extension'] = $extensions;
         }
 
         return $resource;
@@ -154,6 +228,62 @@ class PatientMapper
         }
 
         return $gender;
+    }
+
+    /**
+     * @param array<string, mixed> $resource
+     */
+    private static function extractExtensionString(array $resource, string $url): ?string
+    {
+        foreach (($resource['extension'] ?? []) as $extension) {
+            if (!is_array($extension) || ($extension['url'] ?? null) !== $url) {
+                continue;
+            }
+            $value = $extension['valueString'] ?? null;
+            if (is_string($value) && trim($value) !== '') {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<string, mixed> $resource
+     */
+    private static function extractIdentifierBySystem(array $resource, string $system): ?string
+    {
+        foreach (($resource['identifier'] ?? []) as $identifier) {
+            if (!is_array($identifier) || ($identifier['system'] ?? null) !== $system) {
+                continue;
+            }
+            $value = $identifier['value'] ?? null;
+            if (is_string($value) && trim($value) !== '') {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $extensions
+     */
+    private static function pushStringExtension(array &$extensions, string $url, ?string $value): void
+    {
+        $trimmed = trim((string) $value);
+        if ($trimmed === '') {
+            return;
+        }
+        $extensions[] = [
+            'url' => $url,
+            'valueString' => $trimmed,
+        ];
+    }
+
+    private static function asString(mixed $value): ?string
+    {
+        return is_string($value) && trim($value) !== '' ? $value : null;
     }
 
     private static function generateIdentifierValue(PatientVM $vm): string

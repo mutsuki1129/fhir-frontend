@@ -29,7 +29,13 @@
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ml-6">
+            <div class="hidden sm:flex sm:items-center sm:ml-6 gap-2">
+                <a href="{{ route('locale.switch', ['locale' => 'en']) }}" class="rounded border px-2 py-1 text-xs font-semibold {{ app()->getLocale() === 'en' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 text-slate-700' }}">
+                    EN
+                </a>
+                <a href="{{ route('locale.switch', ['locale' => 'zh_TW']) }}" class="rounded border px-2 py-1 text-xs font-semibold {{ app()->getLocale() === 'zh_TW' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 text-slate-700' }}">
+                    中
+                </a>
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
@@ -89,6 +95,10 @@
             <x-responsive-nav-link :href="route('dashboard.admin')" :active="request()->routeIs('dashboard')">
                 {{ __('ui.nav.dashboard') }}
             </x-responsive-nav-link> 
+            <div class="px-4 pt-2 flex items-center gap-2">
+                <a href="{{ route('locale.switch', ['locale' => 'en']) }}" class="rounded border px-2 py-1 text-xs font-semibold {{ app()->getLocale() === 'en' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 text-slate-700' }}">EN</a>
+                <a href="{{ route('locale.switch', ['locale' => 'zh_TW']) }}" class="rounded border px-2 py-1 text-xs font-semibold {{ app()->getLocale() === 'zh_TW' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 text-slate-700' }}">中</a>
+            </div>
         </div>
 
         <!-- Responsive Settings Options -->

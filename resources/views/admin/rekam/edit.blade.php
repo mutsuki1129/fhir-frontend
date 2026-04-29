@@ -51,6 +51,7 @@
                                 />
                             </div>
                         @else
+                        @php($selectedPatientProfile = $pasiens->firstWhere('id', $rekam->patientId))
                         <form class="px-10 pb-6" method="post" action="{{ route('admin.rekam.update', $rekam->id) }}" data-enhanced-form>
                             @csrf
                             @method('patch')
@@ -100,6 +101,80 @@
                                 <x-text-input id="kondisi" name="kondisi" type="text" class="mt-1 block w-full" :value="old('kondisi', $rekam->note)" />
                                 <p class="mt-1 text-xs text-amber-700">Fallback field: stored as Observation.note.</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('kondisi')" />
+                            </div>
+
+                            <div class="grid md:grid-cols-2 md:gap-6">
+                                <div class="mb-4">
+                                    <x-input-label for="patient_birth_date" :value="__('Birth Date (for age)')" />
+                                    <x-text-input id="patient_birth_date" name="patient_birth_date" type="date" class="mt-1 block w-full" :value="old('patient_birth_date', $selectedPatientProfile?->birthDate)" />
+                                    <x-input-error class="mt-2" :messages="$errors->get('patient_birth_date')" />
+                                </div>
+                                <div class="mb-4">
+                                    <x-input-label for="patient_gender" :value="__('Gender')" />
+                                    <select id="patient_gender" name="patient_gender" class="block bg-transparent py-2.5 px-0 w-full text-sm border-0 border-b-2 border-gray-300 appearance-none text-gray-500 dark:text-gray-400 dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer">
+                                        <option value="">-</option>
+                                        <option value="male" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'male')>male</option>
+                                        <option value="female" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'female')>female</option>
+                                        <option value="other" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'other')>other</option>
+                                        <option value="unknown" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'unknown')>unknown</option>
+                                    </select>
+                                    <x-input-error class="mt-2" :messages="$errors->get('patient_gender')" />
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 md:gap-6">
+                                <div class="mb-4">
+                                    <x-input-label for="patient_education" :value="__('Education')" />
+                                    <x-text-input id="patient_education" name="patient_education" type="text" class="mt-1 block w-full" :value="old('patient_education', $selectedPatientProfile?->education)" />
+                                </div>
+                                <div class="mb-4">
+                                    <x-input-label for="patient_occupation" :value="__('Occupation')" />
+                                    <x-text-input id="patient_occupation" name="patient_occupation" type="text" class="mt-1 block w-full" :value="old('patient_occupation', $selectedPatientProfile?->occupation)" />
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 md:gap-6">
+                                <div class="mb-4">
+                                    <x-input-label for="patient_income" :value="__('Income')" />
+                                    <x-text-input id="patient_income" name="patient_income" type="text" class="mt-1 block w-full" :value="old('patient_income', $selectedPatientProfile?->income)" />
+                                </div>
+                                <div class="mb-4">
+                                    <x-input-label for="patient_expense" :value="__('Expense')" />
+                                    <x-text-input id="patient_expense" name="patient_expense" type="text" class="mt-1 block w-full" :value="old('patient_expense', $selectedPatientProfile?->expense)" />
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 md:gap-6">
+                                <div class="mb-4">
+                                    <x-input-label for="patient_interests" :value="__('Interests')" />
+                                    <x-text-input id="patient_interests" name="patient_interests" type="text" class="mt-1 block w-full" :value="old('patient_interests', $selectedPatientProfile?->interests)" />
+                                </div>
+                                <div class="mb-4">
+                                    <x-input-label for="patient_psychological_traits" :value="__('Psychological Traits')" />
+                                    <x-text-input id="patient_psychological_traits" name="patient_psychological_traits" type="text" class="mt-1 block w-full" :value="old('patient_psychological_traits', $selectedPatientProfile?->psychologicalTraits)" />
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 md:gap-6">
+                                <div class="mb-4">
+                                    <x-input-label for="patient_behavior_patterns" :value="__('Behavior Patterns')" />
+                                    <x-text-input id="patient_behavior_patterns" name="patient_behavior_patterns" type="text" class="mt-1 block w-full" :value="old('patient_behavior_patterns', $selectedPatientProfile?->behaviorPatterns)" />
+                                </div>
+                                <div class="mb-4">
+                                    <x-input-label for="patient_biomarkers" :value="__('Biomarkers')" />
+                                    <x-text-input id="patient_biomarkers" name="patient_biomarkers" type="text" class="mt-1 block w-full" :value="old('patient_biomarkers', $selectedPatientProfile?->biomarkers)" />
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 md:gap-6">
+                                <div class="mb-4">
+                                    <x-input-label for="patient_national_id" :value="__('National ID')" />
+                                    <x-text-input id="patient_national_id" name="patient_national_id" type="text" class="mt-1 block w-full" :value="old('patient_national_id', $selectedPatientProfile?->nationalId)" />
+                                </div>
+                                <div class="mb-4">
+                                    <x-input-label for="patient_nhi_card_number" :value="__('NHI Card Number')" />
+                                    <x-text-input id="patient_nhi_card_number" name="patient_nhi_card_number" type="text" class="mt-1 block w-full" :value="old('patient_nhi_card_number', $selectedPatientProfile?->nhiCardNumber)" />
+                                </div>
                             </div>
 
                             <div class="grid md:grid-cols-2 md:gap-6">
@@ -177,6 +252,47 @@
                         </form>
                         <script>
                             (() => {
+                                const patientSelect = document.getElementById('pasien');
+                                const patientMap = @json($pasiens->mapWithKeys(fn($p) => [$p->id => [
+                                    'birthDate' => $p->birthDate,
+                                    'gender' => $p->gender,
+                                    'education' => $p->education,
+                                    'occupation' => $p->occupation,
+                                    'income' => $p->income,
+                                    'expense' => $p->expense,
+                                    'interests' => $p->interests,
+                                    'psychologicalTraits' => $p->psychologicalTraits,
+                                    'behaviorPatterns' => $p->behaviorPatterns,
+                                    'biomarkers' => $p->biomarkers,
+                                    'nationalId' => $p->nationalId,
+                                    'nhiCardNumber' => $p->nhiCardNumber,
+                                ]])->all());
+                                const patientFieldMap = {
+                                    patient_birth_date: 'birthDate',
+                                    patient_gender: 'gender',
+                                    patient_education: 'education',
+                                    patient_occupation: 'occupation',
+                                    patient_income: 'income',
+                                    patient_expense: 'expense',
+                                    patient_interests: 'interests',
+                                    patient_psychological_traits: 'psychologicalTraits',
+                                    patient_behavior_patterns: 'behaviorPatterns',
+                                    patient_biomarkers: 'biomarkers',
+                                    patient_national_id: 'nationalId',
+                                    patient_nhi_card_number: 'nhiCardNumber',
+                                };
+                                const applyPatientProfile = () => {
+                                    const selected = patientMap[patientSelect?.value || ''];
+                                    if (!selected) return;
+                                    Object.entries(patientFieldMap).forEach(([fieldId, key]) => {
+                                        const input = document.getElementById(fieldId);
+                                        if (input && !input.value) {
+                                            input.value = selected[key] || '';
+                                        }
+                                    });
+                                };
+                                patientSelect?.addEventListener('change', applyPatientProfile);
+
                                 const fileInput = document.querySelector('[data-upload-file]');
                                 const startButton = document.querySelector('[data-upload-start]');
                                 const loading = document.querySelector('[data-upload-loading]');

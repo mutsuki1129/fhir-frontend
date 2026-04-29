@@ -36,6 +36,18 @@ class RekamController extends Controller
             'condition_text' => 'nullable|string|max:255',
             'document_reference_title' => 'nullable|string|max:120',
             'document_reference_url' => 'nullable|url|max:2048',
+            'patient_birth_date' => 'nullable|date',
+            'patient_gender' => 'nullable|in:male,female,other,unknown',
+            'patient_education' => 'nullable|string|max:255',
+            'patient_occupation' => 'nullable|string|max:255',
+            'patient_income' => 'nullable|string|max:100',
+            'patient_expense' => 'nullable|string|max:100',
+            'patient_interests' => 'nullable|string|max:255',
+            'patient_psychological_traits' => 'nullable|string|max:255',
+            'patient_behavior_patterns' => 'nullable|string|max:255',
+            'patient_biomarkers' => 'nullable|string|max:255',
+            'patient_national_id' => 'nullable|string|max:64',
+            'patient_nhi_card_number' => 'nullable|string|max:64',
         ]);
 
         try {
@@ -51,6 +63,11 @@ class RekamController extends Controller
             );
             $payload = ObservationMapper::toFhirObservation($observationVm);
             $this->fhirApiClient->create('Observation', $payload);
+            $this->syncPatientProfileFromRecord(
+                patientId: $validated['pasien'],
+                validated: $validated,
+                performerId: self::emptyToNull((string) ($validated['performer'] ?? '')),
+            );
 
             $conditionError = $this->syncConditionForPatient(
                 patientId: $validated['pasien'],
@@ -98,6 +115,7 @@ class RekamController extends Controller
     public function show(): View
     {
         $observationResult = $this->fetchTemperatureObservationsResult();
+        $patientResult = $this->fetchPatientsResult();
         $patientIds = $observationResult['items']->pluck('patientId')->filter()->unique()->values()->all();
         $conditionResult = $this->fetchLatestConditionsByPatientIds($patientIds);
         $documentResult = $this->fetchLatestDocumentReferencesByPatientIds($patientIds);
@@ -109,12 +127,14 @@ class RekamController extends Controller
             'conditionWarning' => $conditionResult['error'],
             'documentReferencesByPatient' => $documentResult['items'],
             'documentReferenceWarning' => $documentResult['error'],
+            'pasiens' => $patientResult['items'],
         ]);
     }
 
     public function pasien(): View
     {
         $observationResult = $this->fetchTemperatureObservationsResult();
+        $patientResult = $this->fetchPatientsResult();
         $rekams = $observationResult['items']
             ->sortBy(fn (TemperatureObservationVM $item) => mb_strtolower($item->patientDisplay ?? $item->patientId))
             ->values();
@@ -129,12 +149,14 @@ class RekamController extends Controller
             'conditionWarning' => $conditionResult['error'],
             'documentReferencesByPatient' => $documentResult['items'],
             'documentReferenceWarning' => $documentResult['error'],
+            'pasiens' => $patientResult['items'],
         ]);
     }
 
     public function dokter(): View
     {
         $observationResult = $this->fetchTemperatureObservationsResult();
+        $patientResult = $this->fetchPatientsResult();
         $rekams = $observationResult['items']
             ->sortBy(fn (TemperatureObservationVM $item) => mb_strtolower($item->performerDisplay ?? ''))
             ->values();
@@ -149,6 +171,7 @@ class RekamController extends Controller
             'conditionWarning' => $conditionResult['error'],
             'documentReferencesByPatient' => $documentResult['items'],
             'documentReferenceWarning' => $documentResult['error'],
+            'pasiens' => $patientResult['items'],
         ]);
     }
 
@@ -233,6 +256,18 @@ class RekamController extends Controller
             'document_reference_id' => 'nullable|string',
             'document_reference_title' => 'nullable|string|max:120',
             'document_reference_url' => 'nullable|url|max:2048',
+            'patient_birth_date' => 'nullable|date',
+            'patient_gender' => 'nullable|in:male,female,other,unknown',
+            'patient_education' => 'nullable|string|max:255',
+            'patient_occupation' => 'nullable|string|max:255',
+            'patient_income' => 'nullable|string|max:100',
+            'patient_expense' => 'nullable|string|max:100',
+            'patient_interests' => 'nullable|string|max:255',
+            'patient_psychological_traits' => 'nullable|string|max:255',
+            'patient_behavior_patterns' => 'nullable|string|max:255',
+            'patient_biomarkers' => 'nullable|string|max:255',
+            'patient_national_id' => 'nullable|string|max:64',
+            'patient_nhi_card_number' => 'nullable|string|max:64',
         ]);
 
         try {
@@ -249,6 +284,11 @@ class RekamController extends Controller
             );
             $payload = ObservationMapper::toFhirObservation($observationVm);
             $this->fhirApiClient->update('Observation', (string) $id, $payload);
+            $this->syncPatientProfileFromRecord(
+                patientId: $validated['pasien'],
+                validated: $validated,
+                performerId: self::emptyToNull((string) ($validated['performer'] ?? '')),
+            );
 
             $conditionError = $this->syncConditionForPatient(
                 patientId: $validated['pasien'],
@@ -663,5 +703,41 @@ class RekamController extends Controller
             'VALIDATION_ERROR' => __('ui.error.validation'),
             default => $exception->getMessage(),
         };
+    }
+
+    /**
+     * @param array<string, mixed> $validated
+     */
+    private function syncPatientProfileFromRecord(string $patientId, array $validated, ?string $performerId): void
+    {
+        try {
+            $existing = $this->fhirApiClient->read('Patient', $patientId);
+            $existingVm = PatientMapper::fromFhirPatient($existing);
+            $patientVm = new \App\ViewModels\PatientVM(
+                id: $patientId,
+                name: $existingVm->name,
+                email: $existingVm->email,
+                phone: $existingVm->phone,
+                photoUrl: $existingVm->photoUrl,
+                birthDate: self::emptyToNull((string) ($validated['patient_birth_date'] ?? '')) ?? $existingVm->birthDate,
+                gender: self::emptyToNull((string) ($validated['patient_gender'] ?? '')) ?? $existingVm->gender,
+                education: self::emptyToNull((string) ($validated['patient_education'] ?? '')) ?? $existingVm->education,
+                occupation: self::emptyToNull((string) ($validated['patient_occupation'] ?? '')) ?? $existingVm->occupation,
+                income: self::emptyToNull((string) ($validated['patient_income'] ?? '')) ?? $existingVm->income,
+                expense: self::emptyToNull((string) ($validated['patient_expense'] ?? '')) ?? $existingVm->expense,
+                interests: self::emptyToNull((string) ($validated['patient_interests'] ?? '')) ?? $existingVm->interests,
+                psychologicalTraits: self::emptyToNull((string) ($validated['patient_psychological_traits'] ?? '')) ?? $existingVm->psychologicalTraits,
+                behaviorPatterns: self::emptyToNull((string) ($validated['patient_behavior_patterns'] ?? '')) ?? $existingVm->behaviorPatterns,
+                biomarkers: self::emptyToNull((string) ($validated['patient_biomarkers'] ?? '')) ?? $existingVm->biomarkers,
+                nationalId: self::emptyToNull((string) ($validated['patient_national_id'] ?? '')) ?? $existingVm->nationalId,
+                nhiCardNumber: self::emptyToNull((string) ($validated['patient_nhi_card_number'] ?? '')) ?? $existingVm->nhiCardNumber,
+                generalPractitionerId: $performerId ?? $existingVm->generalPractitionerId,
+                generalPractitionerDisplay: $existingVm->generalPractitionerDisplay,
+            );
+            $payload = PatientMapper::toFhirPatient($patientVm, $existing);
+            $this->fhirApiClient->update('Patient', $patientId, $payload);
+        } catch (Throwable) {
+            // Non-blocking profile sync to preserve existing observation flow.
+        }
     }
 }

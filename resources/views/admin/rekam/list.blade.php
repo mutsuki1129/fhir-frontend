@@ -64,6 +64,7 @@
                         @foreach($rekams as $rekam)
                             @php($condition = $conditionsByPatient->get($rekam->patientId))
                             @php($documentReference = $documentReferencesByPatient->get($rekam->patientId))
+                            @php($patient = $pasiens->firstWhere('id', $rekam->patientId) ?? null)
                             <section class="rounded-lg border border-gray-200 bg-white shadow-sm">
                                 <div class="p-5">
                                     <h3 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -72,6 +73,18 @@
                                     </h3>
 
                                     <div class="mb-3 grid grid-cols-1 gap-3">
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Age: {{ $patient?->birthDate ? \Carbon\Carbon::parse($patient->birthDate)->age : '-' }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Gender: {{ $patient?->gender ?: '-' }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Education: {{ $patient?->education ?: '-' }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Occupation: {{ $patient?->occupation ?: '-' }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Income/Expense: {{ ($patient?->income ?: '-') . ' / ' . ($patient?->expense ?: '-') }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Interests: {{ $patient?->interests ?: '-' }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Psychological Traits: {{ $patient?->psychologicalTraits ?: '-' }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Behavior Patterns: {{ $patient?->behaviorPatterns ?: '-' }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Biomarkers: {{ $patient?->biomarkers ?: '-' }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">Treating Practitioner: {{ $rekam->performerDisplay ?: ($patient?->generalPractitionerDisplay ?: '-') }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">National ID: {{ $patient?->nationalId ?: '-' }}</p>
+                                        <p class="font-normal text-sm text-gray-700 dark:text-white">NHI Card: {{ $patient?->nhiCardNumber ?: '-' }}</p>
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Performer: {{ $rekam->performerDisplay ?: '-' }}</p>
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Body Temperature: {{ $rekam->valueCelsius }} C</p>
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Effective: {{ $rekam->effectiveDateTime ?: '-' }}</p>
