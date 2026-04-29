@@ -1,7 +1,5 @@
 <x-app-layout>
-    <x-slot name="title">
-        Medical Records
-    </x-slot>
+    <x-slot name="title">{{ __('ui.nav.medical_records') }}</x-slot>
 
     <div>
         @include('layouts.sidebar')
