@@ -107,6 +107,8 @@ return [
     'rekam.treating_practitioner' => 'Treating Practitioner',
     'rekam.performer' => 'Performer',
     'rekam.effective' => 'Effective',
+    'rekam.observation_summary' => 'Observation Summary',
+    'rekam.no_observation_value' => 'No observation value',
     'rekam.linked_condition' => 'Linked condition',
     'rekam.condition' => 'Condition',
     'rekam.fallback_legacy_note' => 'Fallback: legacy note',

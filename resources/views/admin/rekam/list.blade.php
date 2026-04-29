@@ -84,7 +84,11 @@
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.rekam.national_id') }}: {{ $patient?->nationalId ?: '-' }}</p>
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.rekam.nhi_card_number') }}: {{ $patient?->nhiCardNumber ?: '-' }}</p>
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.rekam.performer') }}: {{ $rekam->performerDisplay ?: '-' }}</p>
-                                        <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.rekam.body_temperature_c') }}: {{ $rekam->valueCelsius }} C</p>
+                                        @if($rekam->valueCelsius > 0)
+                                            <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.rekam.body_temperature_c') }}: {{ $rekam->valueCelsius }} C</p>
+                                        @else
+                                            <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.rekam.observation_summary') }}: {{ $rekam->note ?: __('ui.rekam.no_observation_value') }}</p>
+                                        @endif
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.rekam.effective') }}: {{ $rekam->effectiveDateTime ?: '-' }}</p>
 
                                         @if($condition?->id && ($condition?->text || $condition?->code))

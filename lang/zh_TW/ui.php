@@ -107,6 +107,8 @@ return [
     'rekam.treating_practitioner' => '治療醫師',
     'rekam.performer' => '執行者',
     'rekam.effective' => '生效時間',
+    'rekam.observation_summary' => '觀測內容',
+    'rekam.no_observation_value' => '無觀測值',
     'rekam.linked_condition' => '已連結 Condition',
     'rekam.condition' => '病況',
     'rekam.fallback_legacy_note' => 'Fallback：舊版註記',
@@ -131,6 +133,7 @@ return [
     'rekam.attachment_upload_size_error' => '檔案過大，最大 5MB。',
     'rekam.attachment_upload_type_error' => '不支援的檔案格式。',
     'rekam.attachment_upload_success' => '附件驗證通過，已自動帶入標題。請保留 Document URL 供後端同步。',
+
     'sidebar.rekam_list' => '病例列表',
     'sidebar.rekam_patient' => '病患病例',
     'sidebar.rekam_doctor' => '醫師病例',

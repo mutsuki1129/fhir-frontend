@@ -14,6 +14,7 @@ class ObservationMapper
      * in docs/frontend/phase3-field-sync-baseline.md for later incremental mapper expansion.
      */
     private const LOINC_BODY_TEMPERATURE = '8310-5';
+    private const INTAKE_SYSTEM = 'https://example.org/fhir/CodeSystem/patient-intake';
 
     /**
      * @param array<string, mixed> $resource
@@ -26,10 +27,17 @@ class ObservationMapper
         $patientId = self::extractIdFromReference($subjectReference);
         $performerId = self::extractIdFromReference($performerReference);
 
-        $valueCelsius = self::extractTemperatureValue($resource);
+        $isTemperature = self::isTemperatureObservation($resource);
+        $valueCelsius = $isTemperature ? self::extractTemperatureValue($resource) : 0.0;
 
         $noteText = data_get($resource, 'note.0.text');
-        $note = is_string($noteText) ? $noteText : null;
+        $note = is_string($noteText) ? trim($noteText) : null;
+        if (!$isTemperature) {
+            $summary = self::buildObservationSummary($resource);
+            if ($summary !== null && $summary !== '') {
+                $note = $note ? "{$note} | {$summary}" : $summary;
+            }
+        }
 
         return new TemperatureObservationVM(
             id: (string) ($resource['id'] ?? ''),
@@ -122,15 +130,21 @@ class ObservationMapper
             return false;
         }
 
-        if (self::hasBodyTemperatureCode($resource)) {
+        if (self::isTemperatureObservation($resource)) {
             return true;
         }
 
-        if (self::hasCelsiusQuantity($resource)) {
-            return true;
-        }
+        return self::hasPatientIntakeCodeSystem($resource);
+    }
 
-        return self::hasCelsiusComponent($resource);
+    /**
+     * @param array<string, mixed> $resource
+     */
+    public static function isTemperatureObservation(array $resource): bool
+    {
+        return self::hasBodyTemperatureCode($resource)
+            || self::hasCelsiusQuantity($resource)
+            || self::hasCelsiusComponent($resource);
     }
 
     /**
@@ -194,6 +208,28 @@ class ObservationMapper
     /**
      * @param array<string, mixed> $resource
      */
+    private static function hasPatientIntakeCodeSystem(array $resource): bool
+    {
+        $codings = data_get($resource, 'code.coding', []);
+        if (!is_array($codings)) {
+            return false;
+        }
+
+        foreach ($codings as $coding) {
+            if (!is_array($coding)) {
+                continue;
+            }
+            if ((string) ($coding['system'] ?? '') === self::INTAKE_SYSTEM) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array<string, mixed> $resource
+     */
     private static function hasCelsiusQuantity(array $resource): bool
     {
         $unit = mb_strtolower((string) data_get($resource, 'valueQuantity.unit', ''));
@@ -235,6 +271,37 @@ class ObservationMapper
         }
 
         return false;
+    }
+
+    /**
+     * @param array<string, mixed> $resource
+     */
+    private static function buildObservationSummary(array $resource): ?string
+    {
+        $codeText = trim((string) data_get($resource, 'code.text', ''));
+        if ($codeText === '') {
+            $codeText = trim((string) data_get($resource, 'code.coding.0.display', ''));
+        }
+        if ($codeText === '') {
+            $codeText = trim((string) data_get($resource, 'code.coding.0.code', ''));
+        }
+
+        $valueText = trim((string) data_get($resource, 'valueString', ''));
+        if ($valueText === '') {
+            $valueText = trim((string) data_get($resource, 'valueCodeableConcept.text', ''));
+        }
+        if ($valueText === '') {
+            $valueText = trim((string) data_get($resource, 'valueQuantity.value', ''));
+        }
+
+        if ($codeText === '' && $valueText === '') {
+            return null;
+        }
+        if ($codeText !== '' && $valueText !== '') {
+            return "{$codeText}: {$valueText}";
+        }
+
+        return $codeText !== '' ? $codeText : $valueText;
     }
 
     private static function extractIdFromReference(string $reference): string
