@@ -26,8 +26,7 @@ class ObservationMapper
         $patientId = self::extractIdFromReference($subjectReference);
         $performerId = self::extractIdFromReference($performerReference);
 
-        $value = data_get($resource, 'valueQuantity.value');
-        $valueCelsius = is_numeric($value) ? (float) $value : 0.0;
+        $valueCelsius = self::extractTemperatureValue($resource);
 
         $noteText = data_get($resource, 'note.0.text');
         $note = is_string($noteText) ? $noteText : null;
@@ -108,6 +107,68 @@ class ObservationMapper
     public static function bodyTemperatureCode(): string
     {
         return self::LOINC_BODY_TEMPERATURE;
+    }
+
+    /**
+     * Determine whether an Observation is usable on rekam pages.
+     * We keep this broad to avoid dropping newly-added observation shapes.
+     *
+     * @param array<string, mixed> $resource
+     */
+    public static function isRekamCandidate(array $resource): bool
+    {
+        $subjectRef = (string) data_get($resource, 'subject.reference', '');
+        if ($subjectRef === '' || !str_starts_with($subjectRef, 'Patient/')) {
+            return false;
+        }
+
+        if (self::extractTemperatureValue($resource) !== 0.0) {
+            return true;
+        }
+
+        $valueString = (string) data_get($resource, 'valueString', '');
+        if (trim($valueString) !== '') {
+            return true;
+        }
+
+        $note = (string) data_get($resource, 'note.0.text', '');
+        return trim($note) !== '';
+    }
+
+    /**
+     * @param array<string, mixed> $resource
+     */
+    private static function extractTemperatureValue(array $resource): float
+    {
+        $value = data_get($resource, 'valueQuantity.value');
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
+
+        $valueString = data_get($resource, 'valueString');
+        if (is_string($valueString) && preg_match('/-?\d+(?:\.\d+)?/', $valueString, $matches) === 1) {
+            return (float) $matches[0];
+        }
+
+        $components = data_get($resource, 'component', []);
+        if (is_array($components)) {
+            foreach ($components as $component) {
+                if (!is_array($component)) {
+                    continue;
+                }
+                $componentValue = data_get($component, 'valueQuantity.value');
+                if (is_numeric($componentValue)) {
+                    return (float) $componentValue;
+                }
+
+                $componentString = data_get($component, 'valueString');
+                if (is_string($componentString) && preg_match('/-?\d+(?:\.\d+)?/', $componentString, $matches) === 1) {
+                    return (float) $matches[0];
+                }
+            }
+        }
+
+        return 0.0;
     }
 
     private static function extractIdFromReference(string $reference): string

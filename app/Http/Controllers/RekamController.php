@@ -35,7 +35,7 @@ class RekamController extends Controller
             'condition_code' => ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z0-9][A-Za-z0-9._:\/-]{0,63}$/'],
             'condition_text' => 'nullable|string|max:255',
             'document_reference_title' => 'nullable|string|max:120',
-            'document_reference_url' => 'nullable|url|max:2048',
+            'document_reference_url' => 'nullable|url|max:2048|required_with:document_reference_title',
             'patient_birth_date' => 'nullable|date',
             'patient_gender' => 'nullable|in:male,female,other,unknown',
             'patient_education' => 'nullable|string|max:255',
@@ -48,6 +48,8 @@ class RekamController extends Controller
             'patient_biomarkers' => 'nullable|string|max:255',
             'patient_national_id' => 'nullable|string|max:64',
             'patient_nhi_card_number' => 'nullable|string|max:64',
+        ], [
+            'document_reference_url.required_with' => __('ui.rekam.document_url_required_with_title'),
         ]);
 
         try {
@@ -255,7 +257,7 @@ class RekamController extends Controller
             'condition_text' => 'nullable|string|max:255',
             'document_reference_id' => 'nullable|string',
             'document_reference_title' => 'nullable|string|max:120',
-            'document_reference_url' => 'nullable|url|max:2048',
+            'document_reference_url' => 'nullable|url|max:2048|required_with:document_reference_title',
             'patient_birth_date' => 'nullable|date',
             'patient_gender' => 'nullable|in:male,female,other,unknown',
             'patient_education' => 'nullable|string|max:255',
@@ -268,6 +270,8 @@ class RekamController extends Controller
             'patient_biomarkers' => 'nullable|string|max:255',
             'patient_national_id' => 'nullable|string|max:64',
             'patient_nhi_card_number' => 'nullable|string|max:64',
+        ], [
+            'document_reference_url.required_with' => __('ui.rekam.document_url_required_with_title'),
         ]);
 
         try {
@@ -408,10 +412,11 @@ class RekamController extends Controller
     private function fetchTemperatureObservationsResult(): array
     {
         try {
+            // Fetch a broader Observation set first; filter in app layer to avoid
+            // dropping new clinical records that do not use a single fixed code.
             $bundle = $this->fhirApiClient->search('Observation', [
-                'code' => ObservationMapper::bodyTemperatureCode(),
                 '_include' => ['Observation:subject', 'Observation:performer'],
-                '_count' => 200,
+                '_count' => 500,
             ]);
             $entries = $bundle['entry'] ?? [];
             if (!is_array($entries)) {
@@ -447,6 +452,7 @@ class RekamController extends Controller
 
             return [
                 'items' => collect($observationResources)
+                    ->filter(fn (array $resource) => ObservationMapper::isRekamCandidate($resource))
                     ->map(fn (array $resource) => ObservationMapper::fromFhirObservation($resource))
                     ->map(function (TemperatureObservationVM $vm) use ($patientDisplay, $performerDisplay, $patientMapFromList): TemperatureObservationVM {
                         if (($vm->patientDisplay ?? '') === '' && $vm->patientId !== '') {
