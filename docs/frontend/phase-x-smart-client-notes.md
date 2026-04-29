@@ -80,6 +80,25 @@ Backend/frontend integration note:
 
 - `FhirApiException` now normalizes `403` to error key `FORBIDDEN` (Phase X X1 hook).
 
+## Error Code <-> i18n Key Mapping (X2)
+
+Recommended frontend message key mapping:
+
+| Error key | HTTP | i18n key | Default intent |
+|---|---:|---|---|
+| `UNAUTHORIZED` | 401 | `ui.error.unauthorized` | session expired / auth required |
+| `FORBIDDEN` | 403 | `ui.error.forbidden` | scope or permission not granted |
+| `NETWORK_ERROR` | 503-ish | `ui.error.network` | backend temporarily unreachable |
+| `TIMEOUT` | 408 | `ui.error.timeout` | request timed out |
+| `VALIDATION_ERROR` | 4xx | `ui.error.validation` | input-level correction needed |
+| `UNKNOWN_ERROR` | any | `ui.error.unknown` | generic fallback |
+
+Current status:
+
+1. Backend error keys are available via `FhirApiException::errorKey()`.
+2. Translation keys are added as baseline hooks in `lang/en/ui.php` and `lang/zh_TW/ui.php`.
+3. Full controller/view-level key consumption remains a follow-up task.
+
 ## Non-goals in X1
 
 - No OAuth redirect implementation

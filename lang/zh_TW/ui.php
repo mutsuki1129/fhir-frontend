@@ -42,4 +42,12 @@ return [
     'rekam.title' => '病例頁',
     'rekam.load_error' => '無法載入病例',
     'rekam.empty' => '目前尚無體溫觀測',
+
+    // Phase X X2 錯誤訊息鍵掛點（對應 errorKey）。
+    'error.unauthorized' => '登入已逾時或未授權，請重新登入。',
+    'error.forbidden' => '目前權限不足，無法存取此資料範圍。',
+    'error.network' => '目前無法連線 FHIR 服務，請稍後再試。',
+    'error.timeout' => '請求逾時，請稍後再試。',
+    'error.validation' => '請確認欄位內容後再送出。',
+    'error.unknown' => '發生未知錯誤，請稍後再試。',
 ];

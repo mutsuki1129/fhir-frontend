@@ -42,4 +42,12 @@ return [
     'rekam.title' => 'Medical Records Page',
     'rekam.load_error' => 'Unable to load medical records',
     'rekam.empty' => 'No temperature observations yet',
+
+    // Phase X X2 error-message hooks for errorKey-driven rendering.
+    'error.unauthorized' => 'Session expired or unauthorized. Please sign in again.',
+    'error.forbidden' => 'You do not have permission to access this data scope.',
+    'error.network' => 'Unable to reach the FHIR service right now. Please try again later.',
+    'error.timeout' => 'The request timed out. Please try again.',
+    'error.validation' => 'Please review the highlighted fields and try again.',
+    'error.unknown' => 'Unexpected error occurred. Please try again.',
 ];
