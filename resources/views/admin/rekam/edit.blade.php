@@ -10,43 +10,43 @@
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="py-7 px-10 text-gray-900 dark:text-gray-100">
-                            {{ __("Edit Medical Record") }}
+                            {{ __('ui.rekam.edit_title') }}
                         </div>
 
                         <div class="mx-10 mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                            Phase 2 baseline: Observation + Condition + DocumentReference, with non-blocking fallback.
+                            {{ __('ui.rekam.phase_notice') }}
                         </div>
 
                         @if (!empty($conditionWarning))
                             <div class="mx-10 mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                                Condition service warning (non-blocking): {{ $conditionWarning }}
+                                {{ __('ui.rekam.condition_warning', ['message' => $conditionWarning]) }}
                             </div>
                         @endif
                         @if (!empty($documentReferenceWarning))
                             <div class="mx-10 mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                                DocumentReference service warning (non-blocking): {{ $documentReferenceWarning }}
+                                {{ __('ui.rekam.document_warning', ['message' => $documentReferenceWarning]) }}
                             </div>
                         @endif
                         @if (!empty($practitionerWarning))
                             <div class="mx-10 mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                                Practitioner service warning (non-blocking): {{ $practitionerWarning }}
+                                {{ __('ui.rekam.practitioner_warning', ['message' => $practitionerWarning]) }}
                             </div>
                         @endif
 
                         @if ($pageError || !$rekam)
                             <div class="px-10 pb-10">
                                 <x-error-state
-                                    title="Unable to load medical record"
-                                    :message="$pageError ?? 'Temperature observation data is unavailable right now.'"
+                                    :title="__('ui.rekam.load_record_error')"
+                                    :message="$pageError ?? __('ui.rekam.record_unavailable')"
                                     :retry-href="request()->fullUrl()"
                                 />
                             </div>
                         @elseif($pasiens->isEmpty())
                             <div class="px-10 pb-10">
                                 <x-empty-state
-                                    title="No patients available"
-                                    message="Patient options are required before this temperature observation can be updated."
-                                    action-label="Go to Patients"
+                                    :title="__('ui.rekam.no_patients_title')"
+                                    :message="__('ui.rekam.no_patients_edit_message')"
+                                    :action-label="__('ui.rekam.go_patients')"
                                     :action-href="route('pasiens.list')"
                                 />
                             </div>
@@ -62,7 +62,7 @@
                                 <div class="mb-4">
                                     <x-input-label for="pasien" :value="__('Patient')" />
                                     <select name="pasien" id="pasien" class="block bg-transparent py-2.5 px-0 w-full text-sm border-0 border-b-2 border-gray-300 appearance-none text-gray-500 dark:text-gray-400 dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" required>
-                                        <option value="" disabled>Select Patient</option>
+                                        <option value="" disabled>{{ __('ui.rekam.select_patient') }}</option>
                                         @foreach($pasiens as $pasien)
                                             <option value="{{ $pasien->id }}" @selected((string) old('pasien', $rekam->patientId) === (string) $pasien->id)>
                                                 {{ $pasien->name }}
@@ -72,9 +72,9 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('pasien')" />
                                 </div>
                                 <div class="mb-4">
-                                    <x-input-label for="performer" :value="__('Practitioner (Optional)')" />
+                                    <x-input-label for="performer" :value="__('ui.rekam.performer_optional')" />
                                     <select name="performer" id="performer" class="block bg-transparent py-2.5 px-0 w-full text-sm border-0 border-b-2 border-gray-300 appearance-none text-gray-500 dark:text-gray-400 dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer">
-                                        <option value="">Unassigned</option>
+                                        <option value="">{{ __('ui.rekam.unassigned') }}</option>
                                         @foreach($practitioners as $practitioner)
                                             <option value="{{ $practitioner->id }}" @selected((string) old('performer', $rekam->performerId) === (string) $practitioner->id)>{{ $practitioner->name }}</option>
                                         @endforeach
@@ -85,38 +85,38 @@
 
                             <div class="grid md:grid-cols-2 md:gap-6">
                                 <div class="mb-4">
-                                    <x-input-label for="effective_datetime" :value="__('Effective Date Time (Optional)')" />
+                                    <x-input-label for="effective_datetime" :value="__('ui.rekam.effective_datetime_optional')" />
                                     <x-text-input id="effective_datetime" name="effective_datetime" type="datetime-local" class="mt-1 block w-full" :value="old('effective_datetime', $rekam->effectiveDateTime ? \Carbon\Carbon::parse($rekam->effectiveDateTime)->format('Y-m-d\TH:i') : '')" />
                                     <x-input-error class="mt-2" :messages="$errors->get('effective_datetime')" />
                                 </div>
                                 <div class="mb-4">
-                                    <x-input-label for="suhu" :value="__('Body Temperature (C)')" />
+                                    <x-input-label for="suhu" :value="__('ui.rekam.body_temperature_c')" />
                                     <x-text-input id="suhu" name="suhu" type="text" class="mt-1 block w-full" :value="old('suhu', $rekam->valueCelsius)" required />
                                     <x-input-error class="mt-2" :messages="$errors->get('suhu')" />
                                 </div>
                             </div>
 
                             <div class="mb-4">
-                                <x-input-label for="kondisi" :value="__('Legacy Condition Note (Optional)')" />
+                                <x-input-label for="kondisi" :value="__('ui.rekam.legacy_condition_optional')" />
                                 <x-text-input id="kondisi" name="kondisi" type="text" class="mt-1 block w-full" :value="old('kondisi', $rekam->note)" />
-                                <p class="mt-1 text-xs text-amber-700">Fallback field: stored as Observation.note.</p>
+                                <p class="mt-1 text-xs text-amber-700">{{ __('ui.rekam.legacy_condition_hint') }}</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('kondisi')" />
                             </div>
 
                             <div class="grid md:grid-cols-2 md:gap-6">
                                 <div class="mb-4">
-                                    <x-input-label for="patient_birth_date" :value="__('Birth Date (for age)')" />
+                                    <x-input-label for="patient_birth_date" :value="__('ui.rekam.birth_date_for_age')" />
                                     <x-text-input id="patient_birth_date" name="patient_birth_date" type="date" class="mt-1 block w-full" :value="old('patient_birth_date', $selectedPatientProfile?->birthDate)" />
                                     <x-input-error class="mt-2" :messages="$errors->get('patient_birth_date')" />
                                 </div>
                                 <div class="mb-4">
-                                    <x-input-label for="patient_gender" :value="__('Gender')" />
+                                    <x-input-label for="patient_gender" :value="__('ui.rekam.gender')" />
                                     <select id="patient_gender" name="patient_gender" class="block bg-transparent py-2.5 px-0 w-full text-sm border-0 border-b-2 border-gray-300 appearance-none text-gray-500 dark:text-gray-400 dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer">
                                         <option value="">-</option>
-                                        <option value="male" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'male')>male</option>
-                                        <option value="female" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'female')>female</option>
-                                        <option value="other" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'other')>other</option>
-                                        <option value="unknown" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'unknown')>unknown</option>
+                                        <option value="male" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'male')>{{ __('ui.rekam.gender.male') }}</option>
+                                        <option value="female" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'female')>{{ __('ui.rekam.gender.female') }}</option>
+                                        <option value="other" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'other')>{{ __('ui.rekam.gender.other') }}</option>
+                                        <option value="unknown" @selected(old('patient_gender', $selectedPatientProfile?->gender) === 'unknown')>{{ __('ui.rekam.gender.unknown') }}</option>
                                     </select>
                                     <x-input-error class="mt-2" :messages="$errors->get('patient_gender')" />
                                 </div>
@@ -124,62 +124,62 @@
 
                             <div class="grid md:grid-cols-2 md:gap-6">
                                 <div class="mb-4">
-                                    <x-input-label for="patient_education" :value="__('Education')" />
+                                    <x-input-label for="patient_education" :value="__('ui.rekam.education')" />
                                     <x-text-input id="patient_education" name="patient_education" type="text" class="mt-1 block w-full" :value="old('patient_education', $selectedPatientProfile?->education)" />
                                 </div>
                                 <div class="mb-4">
-                                    <x-input-label for="patient_occupation" :value="__('Occupation')" />
+                                    <x-input-label for="patient_occupation" :value="__('ui.rekam.occupation')" />
                                     <x-text-input id="patient_occupation" name="patient_occupation" type="text" class="mt-1 block w-full" :value="old('patient_occupation', $selectedPatientProfile?->occupation)" />
                                 </div>
                             </div>
 
                             <div class="grid md:grid-cols-2 md:gap-6">
                                 <div class="mb-4">
-                                    <x-input-label for="patient_income" :value="__('Income')" />
+                                    <x-input-label for="patient_income" :value="__('ui.rekam.income')" />
                                     <x-text-input id="patient_income" name="patient_income" type="text" class="mt-1 block w-full" :value="old('patient_income', $selectedPatientProfile?->income)" />
                                 </div>
                                 <div class="mb-4">
-                                    <x-input-label for="patient_expense" :value="__('Expense')" />
+                                    <x-input-label for="patient_expense" :value="__('ui.rekam.expense')" />
                                     <x-text-input id="patient_expense" name="patient_expense" type="text" class="mt-1 block w-full" :value="old('patient_expense', $selectedPatientProfile?->expense)" />
                                 </div>
                             </div>
 
                             <div class="grid md:grid-cols-2 md:gap-6">
                                 <div class="mb-4">
-                                    <x-input-label for="patient_interests" :value="__('Interests')" />
+                                    <x-input-label for="patient_interests" :value="__('ui.rekam.interests')" />
                                     <x-text-input id="patient_interests" name="patient_interests" type="text" class="mt-1 block w-full" :value="old('patient_interests', $selectedPatientProfile?->interests)" />
                                 </div>
                                 <div class="mb-4">
-                                    <x-input-label for="patient_psychological_traits" :value="__('Psychological Traits')" />
+                                    <x-input-label for="patient_psychological_traits" :value="__('ui.rekam.psychological_traits')" />
                                     <x-text-input id="patient_psychological_traits" name="patient_psychological_traits" type="text" class="mt-1 block w-full" :value="old('patient_psychological_traits', $selectedPatientProfile?->psychologicalTraits)" />
                                 </div>
                             </div>
 
                             <div class="grid md:grid-cols-2 md:gap-6">
                                 <div class="mb-4">
-                                    <x-input-label for="patient_behavior_patterns" :value="__('Behavior Patterns')" />
+                                    <x-input-label for="patient_behavior_patterns" :value="__('ui.rekam.behavior_patterns')" />
                                     <x-text-input id="patient_behavior_patterns" name="patient_behavior_patterns" type="text" class="mt-1 block w-full" :value="old('patient_behavior_patterns', $selectedPatientProfile?->behaviorPatterns)" />
                                 </div>
                                 <div class="mb-4">
-                                    <x-input-label for="patient_biomarkers" :value="__('Biomarkers')" />
+                                    <x-input-label for="patient_biomarkers" :value="__('ui.rekam.biomarkers')" />
                                     <x-text-input id="patient_biomarkers" name="patient_biomarkers" type="text" class="mt-1 block w-full" :value="old('patient_biomarkers', $selectedPatientProfile?->biomarkers)" />
                                 </div>
                             </div>
 
                             <div class="grid md:grid-cols-2 md:gap-6">
                                 <div class="mb-4">
-                                    <x-input-label for="patient_national_id" :value="__('National ID')" />
+                                    <x-input-label for="patient_national_id" :value="__('ui.rekam.national_id')" />
                                     <x-text-input id="patient_national_id" name="patient_national_id" type="text" class="mt-1 block w-full" :value="old('patient_national_id', $selectedPatientProfile?->nationalId)" />
                                 </div>
                                 <div class="mb-4">
-                                    <x-input-label for="patient_nhi_card_number" :value="__('NHI Card Number')" />
+                                    <x-input-label for="patient_nhi_card_number" :value="__('ui.rekam.nhi_card_number')" />
                                     <x-text-input id="patient_nhi_card_number" name="patient_nhi_card_number" type="text" class="mt-1 block w-full" :value="old('patient_nhi_card_number', $selectedPatientProfile?->nhiCardNumber)" />
                                 </div>
                             </div>
 
                             <div class="grid md:grid-cols-2 md:gap-6">
                                 <div class="mb-4">
-                                    <x-input-label for="condition_code" :value="__('Condition Code (Optional)')" />
+                                    <x-input-label for="condition_code" :value="__('ui.rekam.condition_code_optional')" />
                                     <x-text-input
                                         id="condition_code"
                                         name="condition_code"
@@ -189,11 +189,11 @@
                                         maxlength="64"
                                         pattern="[A-Za-z0-9][A-Za-z0-9._:/-]{0,63}"
                                     />
-                                    <p class="mt-1 text-xs text-slate-600">Backend contract: optional string, max 64 chars.</p>
+                                    <p class="mt-1 text-xs text-slate-600">{{ __('ui.rekam.condition_code_hint') }}</p>
                                     <x-input-error class="mt-2" :messages="$errors->get('condition_code')" />
                                 </div>
                                 <div class="mb-4">
-                                    <x-input-label for="condition_text" :value="__('Condition Text (Optional)')" />
+                                    <x-input-label for="condition_text" :value="__('ui.rekam.condition_text_optional')" />
                                     <x-text-input
                                         id="condition_text"
                                         name="condition_text"
@@ -202,21 +202,21 @@
                                         :value="old('condition_text', $condition?->text)"
                                         maxlength="255"
                                     />
-                                    <p class="mt-1 text-xs text-slate-600">Backend contract: optional string, max 255 chars.</p>
+                                    <p class="mt-1 text-xs text-slate-600">{{ __('ui.rekam.condition_text_hint') }}</p>
                                     <x-input-error class="mt-2" :messages="$errors->get('condition_text')" />
                                 </div>
                             </div>
 
                             <div class="mb-4">
-                                <x-input-label for="document_reference_title" :value="__('Document Title (Optional)')" />
+                                <x-input-label for="document_reference_title" :value="__('ui.rekam.document_title_optional')" />
                                 <x-text-input id="document_reference_title" name="document_reference_title" type="text" class="mt-1 block w-full" :value="old('document_reference_title', $documentReference?->title)" maxlength="120" />
                                 <x-input-error class="mt-2" :messages="$errors->get('document_reference_title')" />
                             </div>
 
                             <div class="mb-4">
-                                <x-input-label for="document_reference_url" :value="__('Document URL (Optional)')" />
+                                <x-input-label for="document_reference_url" :value="__('ui.rekam.document_url_optional')" />
                                 <x-text-input id="document_reference_url" name="document_reference_url" type="url" class="mt-1 block w-full" :value="old('document_reference_url', $documentReference?->url)" maxlength="2048" />
-                                <p class="mt-1 text-xs text-slate-600">Phase 2 Media/DocumentReference baseline: external URL attachment.</p>
+                                <p class="mt-1 text-xs text-slate-600">{{ __('ui.rekam.document_url_hint') }}</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('document_reference_url')" />
                             </div>
 
@@ -246,14 +246,13 @@
                             </div>
 
                             <button type="submit" class="text-white bg-blue-700 mb-3 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">
-                                <span data-submit-default>Submit</span>
-                                <span data-submit-loading class="hidden">Saving...</span>
+                                <span data-submit-default>{{ __('ui.rekam.submit') }}</span>
+                                <span data-submit-loading class="hidden">{{ __('ui.rekam.saving') }}</span>
                             </button>
                         </form>
-                        <script>
-                            (() => {
-                                const patientSelect = document.getElementById('pasien');
-                                const patientMap = @json($pasiens->mapWithKeys(fn($p) => [$p->id => [
+                        @php
+                            $patientMap = $pasiens->mapWithKeys(function ($p) {
+                                return [(string) $p->id => [
                                     'birthDate' => $p->birthDate,
                                     'gender' => $p->gender,
                                     'education' => $p->education,
@@ -266,7 +265,13 @@
                                     'biomarkers' => $p->biomarkers,
                                     'nationalId' => $p->nationalId,
                                     'nhiCardNumber' => $p->nhiCardNumber,
-                                ]])->all());
+                                ]];
+                            })->all();
+                        @endphp
+                        <script>
+                            (() => {
+                                const patientSelect = document.getElementById('pasien');
+                                const patientMap = @json($patientMap);
                                 const patientFieldMap = {
                                     patient_birth_date: 'birthDate',
                                     patient_gender: 'gender',
