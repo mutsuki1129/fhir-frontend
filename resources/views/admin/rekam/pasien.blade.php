@@ -12,8 +12,8 @@ $previousPatient = null;
         <div class="p-4 sm:ml-64">
             <div class="py-12">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div class="mb-4 rounded border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-sky-900">
-                        Linkage note: Condition and DocumentReference are displayed by patient-latest inference and may not match each Observation timestamp.
+                    <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                        Patient view prioritizes deterministic linkage when explicit resources are present; legacy note and patient-latest resources are used as fallback.
                     </div>
                     @if (!empty($conditionWarning))
                         <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -46,8 +46,8 @@ $previousPatient = null;
                                 $previousPatient = $rekam->patientDisplay ?: $rekam->patientId;
                             @endphp
 
-                            <h3 class="bg-blue-100 text-blue-800 text-2xl font-semibold px-2.5 y-6 py-1 mb-5 mt-8 rounded dark:bg-gray-700 dark:text-gray-200">{{ $previousPatient }}</h3>
-                            <div class="container mx-auto gap-8 flex flex-col sm:flex-row flex-wrap">
+                            <h3 class="mb-5 mt-8 rounded bg-blue-100 px-2.5 py-1 text-2xl font-semibold text-blue-800">{{ $previousPatient }}</h3>
+                            <div class="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                                 @foreach($rekams as $rekamInner)
                                     @if(($rekamInner->patientDisplay ?: $rekamInner->patientId) === $previousPatient)
                                         @php($condition = $conditionsByPatient->get($rekamInner->patientId))

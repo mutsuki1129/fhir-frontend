@@ -159,7 +159,13 @@
                                     <button type="button" class="rounded bg-slate-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800" data-upload-start>
                                         {{ __('ui.rekam.attachment_upload_action') }}
                                     </button>
+                                    <button type="button" class="hidden rounded border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100" data-upload-retry>
+                                        {{ __('ui.common.retry') }}
+                                    </button>
                                     <span class="hidden text-xs text-blue-700" data-upload-loading>{{ __('ui.rekam.attachment_uploading') }}</span>
+                                </div>
+                                <div class="mt-2 hidden h-2 w-full overflow-hidden rounded bg-slate-100" data-upload-progress-wrap>
+                                    <div class="h-full w-0 bg-blue-600 transition-all" data-upload-progress></div>
                                 </div>
                                 <p class="mt-2 hidden rounded border px-2 py-1 text-xs" data-upload-feedback></p>
                             </div>
@@ -174,6 +180,9 @@
                                 const fileInput = document.querySelector('[data-upload-file]');
                                 const startButton = document.querySelector('[data-upload-start]');
                                 const loading = document.querySelector('[data-upload-loading]');
+                                const retryButton = document.querySelector('[data-upload-retry]');
+                                const progressWrap = document.querySelector('[data-upload-progress-wrap]');
+                                const progress = document.querySelector('[data-upload-progress]');
                                 const feedback = document.querySelector('[data-upload-feedback]');
                                 const titleInput = document.getElementById('document_reference_title');
                                 const maxSize = 5 * 1024 * 1024;
@@ -196,30 +205,54 @@
                                     feedback.classList.add(success ? 'text-green-700' : 'text-red-700');
                                 };
 
-                                startButton?.addEventListener('click', () => {
+                                const resetProgress = () => {
+                                    progressWrap?.classList.add('hidden');
+                                    if (progress) {
+                                        progress.style.width = '0%';
+                                    }
+                                };
+
+                                const validateAndMockUpload = () => {
                                     const file = fileInput?.files?.[0];
                                     if (!file) {
                                         showFeedback(@json(__('ui.rekam.attachment_upload_no_file')), false);
+                                        retryButton?.classList.remove('hidden');
                                         return;
                                     }
                                     if (file.size > maxSize) {
                                         showFeedback(@json(__('ui.rekam.attachment_upload_size_error')), false);
+                                        retryButton?.classList.remove('hidden');
                                         return;
                                     }
                                     if (!allowedTypes.includes(file.type)) {
                                         showFeedback(@json(__('ui.rekam.attachment_upload_type_error')), false);
+                                        retryButton?.classList.remove('hidden');
                                         return;
                                     }
 
+                                    retryButton?.classList.add('hidden');
                                     loading?.classList.remove('hidden');
-                                    setTimeout(() => {
-                                        loading?.classList.add('hidden');
-                                        if (titleInput && !titleInput.value.trim()) {
-                                            titleInput.value = file.name;
+                                    progressWrap?.classList.remove('hidden');
+                                    let value = 0;
+                                    const timer = setInterval(() => {
+                                        value += 20;
+                                        if (progress) {
+                                            progress.style.width = `${value}%`;
                                         }
-                                        showFeedback(@json(__('ui.rekam.attachment_upload_success')), true);
-                                    }, 600);
-                                });
+                                        if (value >= 100) {
+                                            clearInterval(timer);
+                                            loading?.classList.add('hidden');
+                                            if (titleInput && !titleInput.value.trim()) {
+                                                titleInput.value = file.name;
+                                            }
+                                            showFeedback(@json(__('ui.rekam.attachment_upload_success')), true);
+                                            setTimeout(resetProgress, 500);
+                                        }
+                                    }, 120);
+                                };
+
+                                startButton?.addEventListener('click', validateAndMockUpload);
+                                retryButton?.addEventListener('click', validateAndMockUpload);
                             })();
                         </script>
                         @endif

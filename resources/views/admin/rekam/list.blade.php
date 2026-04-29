@@ -18,11 +18,22 @@
                             {{ $errors->first('fhir') }}
                         </div>
                     @endif
-                    <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                        Phase 2 list shows Observation + Condition + DocumentReference state with non-blocking fallback.
+                    <div class="mb-4 grid gap-3 md:grid-cols-3">
+                        <div class="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm">
+                            <p class="text-xs uppercase text-slate-500">Observations</p>
+                            <p class="mt-1 text-xl font-semibold">{{ $rekams->count() }}</p>
+                        </div>
+                        <div class="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm">
+                            <p class="text-xs uppercase text-slate-500">Patients</p>
+                            <p class="mt-1 text-xl font-semibold">{{ $rekams->pluck('patientId')->filter()->unique()->count() }}</p>
+                        </div>
+                        <div class="rounded border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm">
+                            <p class="text-xs uppercase text-slate-500">Linked Conditions</p>
+                            <p class="mt-1 text-xl font-semibold">{{ $conditionsByPatient->count() }}</p>
+                        </div>
                     </div>
-                    <div class="mb-4 rounded border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-sky-900">
-                        Linkage note: Condition and DocumentReference are resolved by patient-latest inference, not guaranteed to share the same timestamp as this Observation.
+                    <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                        Deterministic linkage is prioritized when explicit linked resources exist. If unavailable, UI falls back to legacy note and patient-latest references.
                     </div>
                     @if (!empty($conditionWarning))
                         <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -49,16 +60,16 @@
                             :action-href="route('admin.rekam.create')"
                         />
                     @else
-                    <div class="container mx-auto gap-8 flex flex-col sm:flex-row flex-wrap">
+                    <div class="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                         @foreach($rekams as $rekam)
                             @php($condition = $conditionsByPatient->get($rekam->patientId))
                             @php($documentReference = $documentReferencesByPatient->get($rekam->patientId))
-                            <div class="w-96 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                                <div class="p-5 justify-between">
-                                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                            <section class="rounded-lg border border-gray-200 bg-white shadow-sm">
+                                <div class="p-5">
+                                    <h3 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                                         {{ $rekam->patientDisplay ?: $rekam->patientId }}
-                                        <span class="bg-blue-100 text-blue-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-400 ml-2">Patient</span>
-                                    </h5>
+                                        <span class="ml-2 rounded bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">Patient</span>
+                                    </h3>
 
                                     <div class="mb-3 grid grid-cols-1 gap-3">
                                         <p class="font-normal text-sm text-gray-700 dark:text-white">Performer: {{ $rekam->performerDisplay ?: '-' }}</p>
@@ -117,7 +128,7 @@
                                         @endif
                                     </div>
 
-                                    <div class="flex items-center gap-2">
+                                    <div class="mt-4 flex items-center gap-2">
                                         <a href="{{ route('admin.rekam.edit', $rekam->id) }}" data-page-loading-trigger class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
                                             Edit
                                         </a>
@@ -132,7 +143,7 @@
                                         </form>
                                     </div>
                                 </div>
-                            </div>
+                            </section>
                         @endforeach
                     </div>
                     @endif

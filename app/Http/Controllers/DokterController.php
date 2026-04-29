@@ -28,12 +28,6 @@ class DokterController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'nullable|email|max:100',
             'phone_number' => 'nullable|string|max:32',
-            'role_id' => 'nullable|string|max:32',
-            'password' => 'nullable|string|max:100',
-            'age' => 'nullable|integer',
-            'height' => 'nullable|numeric',
-            'weight' => 'nullable|numeric',
-            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         try {
@@ -134,10 +128,6 @@ class DokterController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'nullable|email|max:100',
             'phone_number' => 'nullable|string|max:32',
-            'role_id' => 'nullable|string|max:32',
-            'age' => 'nullable|integer',
-            'height' => 'nullable|numeric',
-            'weight' => 'nullable|numeric',
         ]);
 
         try {
