@@ -56,6 +56,17 @@ Build a stable frontend integration layer on top of existing Phase 1/2 behavior,
 - [x] i18n key consistency tightened on touched list pages to reduce hard-string drift
 - [x] Added manual smoke/regression checklist: `docs/frontend/phase3-m5-smoke-checklist.md`
 
+### M6 (Completed in this batch - regression acceptance)
+
+- [x] Re-checked M5 checklist coverage on medical-record/patient/doctor paths
+- [x] Re-checked i18n key usage consistency on key list flows (`en` / `zh_TW`)
+- [x] Re-validated loading/empty/error/success display convergence on touched pages
+
+### M7 (Completed in this batch - release convergence)
+
+- [x] Added release readiness report: `docs/frontend/phase3-release-readiness.md`
+- [x] Updated Phase 3 status and deferred-risk ledger for freeze handoff
+
 ## Risks
 
 - Existing views mix literal strings and translation calls, so full migration should be incremental
