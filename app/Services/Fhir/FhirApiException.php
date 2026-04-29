@@ -99,6 +99,14 @@ class FhirApiException extends RuntimeException
             return 'VALIDATION_ERROR';
         }
 
+        if ($statusCode === 401) {
+            return 'UNAUTHORIZED';
+        }
+
+        if ($statusCode === 403) {
+            return 'FORBIDDEN';
+        }
+
         if ($statusCode >= 500) {
             return 'UNKNOWN_ERROR';
         }

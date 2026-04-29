@@ -36,6 +36,11 @@ return [
         'base_url' => env('FHIR_BASE_URL', 'http://localhost:8091/fhir'),
         'timeout' => (int) env('FHIR_TIMEOUT_SECONDS', 10),
         'identifier_system' => env('FHIR_PATIENT_IDENTIFIER_SYSTEM', 'urn:app:patient'),
+        // Phase X X1 SMART client hooks (non-breaking, config-only).
+        'smart_enabled' => (bool) env('FHIR_SMART_ENABLED', false),
+        'smart_well_known_url' => env('FHIR_SMART_WELL_KNOWN_URL'),
+        'smart_client_id' => env('FHIR_SMART_CLIENT_ID'),
+        'smart_scopes' => env('FHIR_SMART_SCOPES', 'openid profile patient/Patient.read patient/Observation.read'),
     ],
 
 ];
