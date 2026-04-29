@@ -42,6 +42,14 @@ return [
     'rekam.title' => 'Medical Records Page',
     'rekam.load_error' => 'Unable to load medical records',
     'rekam.empty' => 'No temperature observations yet',
+    'rekam.attachment_upload_label' => 'Attachment Upload (Phase X Draft)',
+    'rekam.attachment_upload_hint' => 'Allowed: PDF/JPG/PNG/TXT/DOC/XLS up to 5 MB. Current backend contract still requires Document URL for final save.',
+    'rekam.attachment_upload_action' => 'Validate Attachment',
+    'rekam.attachment_uploading' => 'Validating attachment...',
+    'rekam.attachment_upload_no_file' => 'Please choose a file first.',
+    'rekam.attachment_upload_size_error' => 'File is too large. Maximum size is 5 MB.',
+    'rekam.attachment_upload_type_error' => 'File type is not supported.',
+    'rekam.attachment_upload_success' => 'Attachment check passed. Title auto-filled. Please keep Document URL for backend sync.',
 
     // Phase X X2 error-message hooks for errorKey-driven rendering.
     'error.unauthorized' => 'Session expired or unauthorized. Please sign in again.',

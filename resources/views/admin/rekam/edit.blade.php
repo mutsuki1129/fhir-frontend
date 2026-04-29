@@ -145,11 +145,83 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('document_reference_url')" />
                             </div>
 
+                            <div class="mb-4 rounded border border-slate-200 p-4">
+                                <x-input-label for="document_upload_file" :value="__('ui.rekam.attachment_upload_label')" />
+                                <input
+                                    id="document_upload_file"
+                                    type="file"
+                                    class="mt-2 block w-full text-sm text-gray-700 file:mr-4 file:rounded file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium"
+                                    accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx,.xls,.xlsx"
+                                    data-upload-file
+                                />
+                                <p class="mt-2 text-xs text-slate-600">{{ __('ui.rekam.attachment_upload_hint') }}</p>
+                                <div class="mt-2 flex gap-2">
+                                    <button type="button" class="rounded bg-slate-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800" data-upload-start>
+                                        {{ __('ui.rekam.attachment_upload_action') }}
+                                    </button>
+                                    <span class="hidden text-xs text-blue-700" data-upload-loading>{{ __('ui.rekam.attachment_uploading') }}</span>
+                                </div>
+                                <p class="mt-2 hidden rounded border px-2 py-1 text-xs" data-upload-feedback></p>
+                            </div>
+
                             <button type="submit" class="text-white bg-blue-700 mb-3 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">
                                 <span data-submit-default>Submit</span>
                                 <span data-submit-loading class="hidden">Saving...</span>
                             </button>
                         </form>
+                        <script>
+                            (() => {
+                                const fileInput = document.querySelector('[data-upload-file]');
+                                const startButton = document.querySelector('[data-upload-start]');
+                                const loading = document.querySelector('[data-upload-loading]');
+                                const feedback = document.querySelector('[data-upload-feedback]');
+                                const titleInput = document.getElementById('document_reference_title');
+                                const maxSize = 5 * 1024 * 1024;
+                                const allowedTypes = [
+                                    'application/pdf',
+                                    'image/jpeg',
+                                    'image/png',
+                                    'text/plain',
+                                    'application/msword',
+                                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                    'application/vnd.ms-excel',
+                                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                ];
+
+                                const showFeedback = (message, success) => {
+                                    feedback.textContent = message;
+                                    feedback.classList.remove('hidden', 'border-red-300', 'bg-red-50', 'text-red-700', 'border-green-300', 'bg-green-50', 'text-green-700');
+                                    feedback.classList.add(success ? 'border-green-300' : 'border-red-300');
+                                    feedback.classList.add(success ? 'bg-green-50' : 'bg-red-50');
+                                    feedback.classList.add(success ? 'text-green-700' : 'text-red-700');
+                                };
+
+                                startButton?.addEventListener('click', () => {
+                                    const file = fileInput?.files?.[0];
+                                    if (!file) {
+                                        showFeedback(@json(__('ui.rekam.attachment_upload_no_file')), false);
+                                        return;
+                                    }
+                                    if (file.size > maxSize) {
+                                        showFeedback(@json(__('ui.rekam.attachment_upload_size_error')), false);
+                                        return;
+                                    }
+                                    if (!allowedTypes.includes(file.type)) {
+                                        showFeedback(@json(__('ui.rekam.attachment_upload_type_error')), false);
+                                        return;
+                                    }
+
+                                    loading?.classList.remove('hidden');
+                                    setTimeout(() => {
+                                        loading?.classList.add('hidden');
+                                        if (titleInput && !titleInput.value.trim()) {
+                                            titleInput.value = file.name;
+                                        }
+                                        showFeedback(@json(__('ui.rekam.attachment_upload_success')), true);
+                                    }, 600);
+                                });
+                            })();
+                        </script>
                         @endif
                     </div>
                 </div>
