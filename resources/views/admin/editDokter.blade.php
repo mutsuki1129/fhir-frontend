@@ -9,7 +9,7 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
                 <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                    Practitioner contract only: legacy doctor profile and photo fields are deferred.
+                    {{ __('ui.doctors.practitioner_contract_notice') }}
                 </div>
 
                 @if ($errors->any())
@@ -49,7 +49,7 @@
                     <div class="flex items-center gap-4">
                         <x-primary-button data-submit-button>
                             <span data-submit-default>{{ __('Save') }}</span>
-                            <span data-submit-loading class="hidden">Saving...</span>
+                            <span data-submit-loading class="hidden">{{ __('ui.common.saving') }}</span>
                         </x-primary-button>
                     </div>
                 </form>

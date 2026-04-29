@@ -21,6 +21,7 @@ return [
     'common.name' => 'Name',
     'common.email' => 'Email',
     'common.phone' => 'Phone Number',
+    'common.saving' => 'Saving...',
 
     'patients.title' => 'Patients List',
     'patients.add' => 'Add Patient',
@@ -31,6 +32,9 @@ return [
     'patients.empty' => 'No patients yet',
     'patients.empty_filtered' => 'No matching patients',
     'patients.phase_notice' => 'Phase 1 clinical form uses FHIR Patient only. Legacy fields (age/height/weight/role/password) are hidden.',
+    'patients.phase_list_notice' => 'Phase 1 list is sourced from FHIR Patient. Legacy patient metrics are hidden.',
+    'patients.empty_filtered_hint' => 'Try a different keyword or clear the search filters.',
+    'patients.empty_create_hint' => 'Create the first patient to start the Phase 1 Patient flow.',
     'patients.creating' => 'Creating Patient...',
 
     'doctors.title' => 'Doctors List',
@@ -40,6 +44,8 @@ return [
     'doctors.search_button' => 'Search',
     'doctors.load_error' => 'Unable to load practitioners',
     'doctors.empty' => 'No practitioners yet',
+    'doctors.practitioner_first_notice' => 'Practitioner-first mode: this page no longer displays legacy doctor profile metrics.',
+    'doctors.practitioner_contract_notice' => 'Practitioner contract only: name, email, and phone are editable in this phase.',
 
     'rekam.title' => 'Medical Records Page',
     'rekam.create_title' => 'Add Medical Record',
@@ -113,6 +119,10 @@ return [
     'rekam.no_document_reference' => 'No document reference',
     'rekam.delete_confirm' => 'Delete this medical record? This only deletes the Observation resource.',
     'rekam.delete_label' => 'Delete medical record',
+    'rekam.grouped_load_error' => 'Unable to load grouped records',
+    'rekam.grouped_patient_empty' => 'No observations grouped by patient',
+    'rekam.grouped_doctor_empty' => 'No observations grouped by performer',
+    'rekam.grouped_empty_message' => 'Grouped temperature observations will appear here after records are created.',
     'rekam.attachment_upload_label' => 'Attachment Upload (Phase X Draft)',
     'rekam.attachment_upload_hint' => 'Allowed: PDF/JPG/PNG/TXT/DOC/XLS up to 5 MB. Current backend contract still requires Document URL for final save.',
     'rekam.attachment_upload_action' => 'Validate Attachment',
@@ -121,6 +131,11 @@ return [
     'rekam.attachment_upload_size_error' => 'File is too large. Maximum size is 5 MB.',
     'rekam.attachment_upload_type_error' => 'File type is not supported.',
     'rekam.attachment_upload_success' => 'Attachment check passed. Title auto-filled. Please keep Document URL for backend sync.',
+    'sidebar.rekam_list' => 'Medical Records List',
+    'sidebar.rekam_patient' => 'Patient Medical Records',
+    'sidebar.rekam_doctor' => 'Doctor Medical Records',
+    'sidebar.rekam_add' => 'Add Medical Record',
+    'sidebar.rekam_edit' => 'Edit Medical Record',
 
     // Phase X X2 error-message hooks for errorKey-driven rendering.
     'error.unauthorized' => 'Session expired or unauthorized. Please sign in again.',

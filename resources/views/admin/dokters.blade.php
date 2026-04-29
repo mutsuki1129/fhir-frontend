@@ -27,7 +27,7 @@
             @endif
 
             <div class="mb-4 rounded border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-sky-900">
-                Practitioner-first mode: this page no longer displays legacy doctor profile metrics.
+                {{ __('ui.doctors.practitioner_first_notice') }}
             </div>
 
             <form action="{{ route('dokters.list') }}" method="get" class="mb-6 grid gap-3 sm:grid-cols-[1fr_auto]">

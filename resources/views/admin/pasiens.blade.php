@@ -41,7 +41,7 @@
                 </div>
             @endif
             <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Phase 1 list is sourced from FHIR Patient. Legacy patient metrics are hidden.
+                {{ __('ui.patients.phase_list_notice') }}
             </div>
             @if ($pageError)
                 <x-error-state
@@ -52,8 +52,8 @@
             @elseif($pasiens->total() === 0)
                 <x-empty-state
                     :title="$query !== '' ? __('ui.patients.empty_filtered') : __('ui.patients.empty')"
-                    :message="$query !== '' ? 'Try a different keyword or clear the search filters.' : 'Create the first patient to start the Phase 1 Patient flow.'"
-                    action-label="Add Patient"
+                    :message="$query !== '' ? __('ui.patients.empty_filtered_hint') : __('ui.patients.empty_create_hint')"
+                    :action-label="__('ui.patients.add')"
                     :action-href="route('pasiens.create')"
                 />
             @else
@@ -110,7 +110,7 @@
                                             <path d="M12.687 14.408a3.01 3.01 0 0 1-1.533.821l-3.566.713a3 3 0 0 1-3.53-3.53l.713-3.566a3.01 3.01 0 0 1 .821-1.533L10.905 2H2.167A2.169 2.169 0 0 0 0 4.167v11.666A2.169 2.169 0 0 0 2.167 18h11.666A2.169 2.169 0 0 0 16 15.833V11.1l-3.313 3.308Zm5.53-9.065.546-.546a2.518 2.518 0 0 0 0-3.56 2.576 2.576 0 0 0-3.559 0l-.547.547 3.56 3.56Z"/>
                                             <path d="M13.243 3.2 7.359 9.081a.5.5 0 0 0-.136.256L6.51 12.9a.5.5 0 0 0 .59.59l3.566-.713a.5.5 0 0 0 .255-.136L16.8 6.757 13.243 3.2Z"/>
                                         </svg>
-                                        <span class="sr-only">Edit</span>
+                                        <span class="sr-only">{{ __('ui.common.edit') }}</span>
                                     </a>
                                 </div>
                             </td>
