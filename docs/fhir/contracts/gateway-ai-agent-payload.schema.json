@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/fhir/contracts/gateway-ai-agent-payload.schema.json",
+  "title": "Gateway AI Agent Payload Schema Draft",
+  "description": "Phase 9A documentation-only schema draft. This is not a runtime validator, not a formal production specification, and not connected to any endpoint.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "messageId",
+    "correlationId",
+    "sourceSystem",
+    "subject",
+    "event",
+    "trust",
+    "payload",
+    "provenance"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.1-draft"
+    },
+    "messageId": {
+      "type": "string",
+      "minLength": 1,
+      "examples": ["msg-001"]
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1,
+      "examples": ["case-001"]
+    },
+    "sourceSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["systemId", "systemType", "displayName"],
+      "properties": {
+        "systemId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "systemType": {
+          "type": "string",
+          "enum": ["ai-agent", "concordance-backend", "mpsw", "external-workflow"]
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "agentContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "agentId": {
+          "type": "string"
+        },
+        "agentRole": {
+          "type": "string",
+          "enum": ["interactive", "perception", "risk-precheck", "clinical-reasoning", "governance", "crisis-alert", "integration"]
+        },
+        "modelVersion": {
+          "type": ["string", "null"]
+        },
+        "runtime": {
+          "const": "not-enabled-in-phase-9a"
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["patientReference"],
+      "properties": {
+        "patientReference": {
+          "type": "string",
+          "pattern": "^Patient/[A-Za-z0-9\\-.]+$"
+        },
+        "displayId": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eventTime", "eventType"],
+      "properties": {
+        "eventTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "encounterReference": {
+          "type": ["string", "null"],
+          "pattern": "^Encounter/[A-Za-z0-9\\-.]+$"
+        },
+        "eventType": {
+          "type": "string",
+          "enum": ["observation", "report", "review", "document", "consent", "alert"]
+        }
+      }
+    },
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataOrigin", "reviewStatus"],
+      "properties": {
+        "dataOrigin": {
+          "type": "string",
+          "enum": ["ai-generated", "ai-suggested", "clinician-observed", "clinician-reviewed", "signed-off"]
+        },
+        "reviewStatus": {
+          "type": "string",
+          "enum": ["pending-review", "clinician-reviewed", "signed-off", "rejected", "superseded"]
+        },
+        "reviewedBy": {
+          "type": ["string", "null"]
+        },
+        "reviewedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observations", "conditions", "diagnosticReports", "documents", "consents"],
+      "properties": {
+        "observations": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "conditions": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "diagnosticReports": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "documents": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "consents": {
+          "type": "array",
+          "items": { "type": "object" }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceReferences", "notes"],
+      "properties": {
+        "sourceReferences": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Safe summary only. Do not include full PHI, token, secret, or binary content."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": "0.1-draft",
+      "messageId": "msg-001",
+      "correlationId": "case-001",
+      "sourceSystem": {
+        "systemId": "agent-system-001",
+        "systemType": "ai-agent",
+        "displayName": "Example AI Agent"
+      },
+      "agentContext": {
+        "agentId": "agent-001",
+        "agentRole": "integration",
+        "modelVersion": null,
+        "runtime": "not-enabled-in-phase-9a"
+      },
+      "subject": {
+        "patientReference": "Patient/patient-001",
+        "displayId": "P-001"
+      },
+      "event": {
+        "eventTime": "2026-05-12T00:00:00Z",
+        "encounterReference": "Encounter/encounter-001",
+        "eventType": "observation"
+      },
+      "trust": {
+        "dataOrigin": "ai-generated",
+        "reviewStatus": "pending-review",
+        "reviewedBy": null,
+        "reviewedAt": null
+      },
+      "payload": {
+        "observations": [],
+        "conditions": [],
+        "diagnosticReports": [],
+        "documents": [],
+        "consents": []
+      },
+      "provenance": {
+        "sourceReferences": [],
+        "notes": "safe summary only"
+      }
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.test/fhir/contracts/fhir-validation-result.schema.json",
+  "title": "FHIR Validation Result Contract Draft",
+  "description": "Phase 9B documentation-only schema draft. Not a runtime validator, not an endpoint contract, not a formal production specification, and contains no real patient data.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "validationId",
+    "messageId",
+    "correlationId",
+    "status",
+    "outcome",
+    "readOnly",
+    "runtime",
+    "candidateResources",
+    "errors",
+    "review"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.1-draft"
+    },
+    "validationId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "messageId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "accepted-for-review",
+        "hold-for-review",
+        "rejected",
+        "validation-failed"
+      ]
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "accepted-for-review",
+        "hold-for-review",
+        "rejected",
+        "mapping-required",
+        "profile-validation-required",
+        "manual-review-required",
+        "validation-passed-candidate",
+        "validation-failed"
+      ]
+    },
+    "readOnly": {
+      "const": true
+    },
+    "runtime": {
+      "type": "string",
+      "enum": [
+        "not-enabled-in-phase-9b"
+      ]
+    },
+    "candidateResources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "candidateId",
+          "resourceType",
+          "mappingStatus",
+          "validationStatus"
+        ],
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resourceType": {
+            "type": "string",
+            "enum": [
+              "DiagnosticReport",
+              "Observation",
+              "Condition",
+              "DocumentReference",
+              "Consent",
+              "Encounter",
+              "Patient",
+              "Provenance",
+              "AuditEvent"
+            ]
+          },
+          "mappingStatus": {
+            "type": "string",
+            "enum": [
+              "candidate",
+              "mapping-required",
+              "ambiguous",
+              "rejected"
+            ]
+          },
+          "validationStatus": {
+            "type": "string",
+            "enum": [
+              "accepted-for-review",
+              "hold-for-review",
+              "profile-validation-required",
+              "manual-review-required",
+              "validation-passed-candidate",
+              "validation-failed"
+            ]
+          }
+        }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "severity",
+          "message",
+          "safeDetails"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^(envelope|source|trust|payload|mapping|fhir-reference|terminology|profile|privacy|binary|review|runtime-boundary)\\.[a-z0-9_]+$"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "information",
+              "warning",
+              "error"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "safeDetails": {
+            "type": "string",
+            "description": "Safe summary only. Do not include sensitive payload or real patient data."
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "reviewStatus",
+        "signedOff"
+      ],
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "reviewStatus": {
+          "type": "string",
+          "enum": [
+            "pending-review",
+            "clinician-reviewed",
+            "signed-off",
+            "rejected",
+            "superseded",
+            "requires-correction"
+          ]
+        },
+        "signedOff": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
