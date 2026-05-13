@@ -1,10 +1,21 @@
 # Validation Result Mock Plan
 
-本文件定義未來 prototype 可以顯示 mock validation result，並銜接 Phase 9B 的 `fhir-validation-result-contract.md` 與 `fhir-validation-result.schema.json`。
+Phase 10B validation result 是 mock only。它參考 Phase 9B `fhir-validation-result-contract.md` 與 `contracts/fhir-validation-result.schema.json` 的概念，但本階段不啟用 runtime validator。
 
-Validation result mock 不等於 live HAPI `$validate`。Validation result mock 不等於 FHIR OperationOutcome。Validation result mock 不等於 clinical correctness。Validation result mock 不等於 signed-off。Validation result mock 不等於 FHIR write approval。
+Validation result mock 不等於 live HAPI `$validate`，不等於 OperationOutcome，不等於 clinical correctness，不等於 signed-off，不等於 FHIR write approval。
 
-## Allowed Mock Outcome
+## Phase 10B / 10B.1 Mock Outcome
+
+- status: hold-for-review
+- outcome: manual-review-required
+- runtime: dev-mock-only
+- readOnly: true
+- review.required: true
+- review.signedOff: false
+- candidateResources[].persisted: false
+- candidateResources[].fhirReference: null
+
+## Allowed Outcome Vocabulary
 
 - accepted-for-review
 - hold-for-review
@@ -19,6 +30,8 @@ Validation result mock 不等於 live HAPI `$validate`。Validation result mock 
 - clinician-confirmed
 - written-to-fhir
 - production-approved
+- clinical advice
+- automatic diagnosis
+- treatment recommendation
 
-Phase 10A does not add validation runtime and does not call live HAPI `$validate`.
-
+Phase 10B.1 不呼叫 live HAPI `$validate`，不產生 validation pass，不允許 FHIR create/update/delete/patch/upload。

@@ -1,51 +1,39 @@
 # Controlled Ingestion Prototype Planning
 
-## Purpose
+Phase 10A 是 planning。Phase 10B 已開始 dev-only mock ingestion prototype，但仍只允許 mock-only preview，不允許 production ingestion 或 FHIR write。
 
-本文件定義未來 Phase 10B dev-only mock ingestion prototype 的規劃草案。
+Phase 10B 是 dev-only mock prototype：feature flag default disabled、no real PHI、no production FHIR Server、no direct FHIR write、manual review queue mock only、validation result mock only、candidate preview only。
 
-Phase 10A is planning. Phase 10A is not runtime. Phase 10A is not an endpoint. Phase 10A is not a queue worker. Phase 10A is not a FHIR write path. Phase 10A is not production ingestion.
-
-Phase 10A 是 Controlled Ingestion Prototype Planning。這不是 ingestion runtime。這不是 Gateway runtime。這不是 AI Agent runtime。這不是 validation runtime。這不是 FHIR write pipeline。這不是 production ingestion。這不是 production approval。這不是 CDS runtime。這不是 SMART production activation。
-
-本階段產出 prototype planning、dev-only scope、mock-only boundary、no-write boundary、manual review queue mock plan、validation result mock plan、candidate staging plan、rollback plan、test data policy、prototype exit criteria、readiness checklist、runtime safety tests、evidence package。
-
-本階段不產出 runtime endpoint、POST /gateway、POST /ingestion、webhook receiver、queue worker、FHIR writer、AI Agent connector、live validation service、production gateway、production ingestion、clinical decision engine、automatic diagnosis engine、treatment recommendation system。
+Phase 10B is not production ingestion, not AI Agent runtime, not CDS runtime, not SMART production, not Gateway runtime for production, not validation runtime, not live HAPI `$validate`, not clinical advice, not automatic diagnosis, and not treatment recommendation.
 
 ## Prototype Concept
 
-未來 Phase 10B 如果另案明確授權，概念只能是：
-
 ```text
-Mock Gateway Payload
-        ↓
-Mock Ingestion Parser
-        ↓
-Mock Validation Result
-        ↓
-Mock Manual Review Queue
-        ↓
-Mock Candidate Resource Preview
-        ↓
-No FHIR Write
+Synthetic Mock Gateway Payload
+        -> Mock Payload Parser
+        -> Mock Validation Result
+        -> Mock Manual Review Queue Item
+        -> Candidate Resource Preview
+        -> No FHIR Write
 ```
 
-Phase 10A 不實作上面任何 runtime。Phase 10A 只定義規劃與邊界。
+## Runtime Limits
 
-## Planning Goals
+允許的 runtime surface 只有：
 
-1. Dev-only
-2. Mock-only
-3. No real PHI
-4. No production FHIR Server
-5. No direct FHIR write
-6. No AI Agent runtime
-7. Manual review required
-8. Validation result mock required
-9. Candidate data staged only
-10. Explicit disablement / rollback
+- `GET /dev/fhir/mock-ingestion`
+- `POST /dev/fhir/mock-ingestion/preview`
 
-## Boundary
+不允許 production gateway / ingestion / agent / validate / validation route，不允許 FHIR writer，不允許 FHIR create/update/delete/patch/upload，不允許 live HAPI `$validate`。
 
-Phase 10A 不新增 Gateway runtime endpoint、不新增 ingestion runtime endpoint、不新增 AI Agent runtime endpoint、不新增 validation runtime endpoint、不新增 POST endpoint、不新增 queue worker、不新增 webhook receiver、不新增 background job、不新增 ingestion controller、不新增 FHIR writer service、不修改 FHIR server runtime、不呼叫 live HAPI `$validate`、不寫入 FHIR Server。
+## Phase 10B.1 Stabilization Boundary
 
+Phase 10B.1 是 Prototype Stabilization / Hardening / Checkpoint Preparation。它只檢查並加固 Phase 10B prototype 的 feature flag、environment guard、mode=mock、no-write、payload safety、UI wording、sample payload、runtime safety 與 evidence package。
+
+Phase 10B.1 不是 Phase 10C，不是 Controlled Write Path Review，不是 production ingestion，不是 production approval，不是 FHIR write pipeline，不是 AI Agent runtime，不是 CDS runtime，也不是 SMART production activation。
+
+Phase 10B.1 不新增 runtime endpoint、不新增 queue worker、不新增 webhook receiver、不新增 FHIR writer、不呼叫 FHIR create/update/delete/patch/upload、不呼叫 live HAPI `$validate`，也不進入 controlled write path。
+
+## Exit Boundary
+
+Phase 10B / Phase 10B.1 完成後仍只代表 dev-only mock prototype 與 stabilization/hardening 完成，不代表 production approval、write enablement、clinical sign-off、SMART production activation、CDS runtime activation 或 AI Agent runtime activation，也不代表允許寫入 FHIR Server。

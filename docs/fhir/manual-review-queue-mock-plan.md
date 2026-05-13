@@ -1,12 +1,12 @@
 # Manual Review Queue Mock Plan
 
-本文件定義未來 mock manual review queue 的 planning。Manual review queue mock 不是真實審核系統。Manual review queue mock 不代表醫師簽核。Manual review queue mock 不會寫入 FHIR Server。Manual review queue mock 不會產生 clinical advice。
+Phase 10B manual review queue 是 mock only。它只是 dev-only mock prototype 的 preview object，不是 queue worker，不是 reviewer assignment runtime，不是 signed-off，不是 clinician-confirmed，不是 production-approved，也不是 written-to-fhir。
 
 ## Queue Item Draft
 
 ```json
 {
-  "queueItemId": "review-item-001",
+  "queueItemId": "review-msg-001",
   "messageId": "msg-001",
   "correlationId": "case-001",
   "status": "pending-review",
@@ -18,7 +18,7 @@
 }
 ```
 
-## Allowed Mock Status
+## Allowed Mock Status For Phase 10B / 10B.1
 
 - pending-review
 - requires-correction
@@ -33,5 +33,4 @@
 - production-approved
 - written-to-fhir
 
-上述禁止狀態除非未來 governance 另案明確授權，否則不得在 prototype 中使用。
-
+Phase 10B.1 只加固 mock queue item 的安全語意。它不新增 automatic sign-off、不新增 reviewer workflow runtime、不新增 controlled write path、不寫入 FHIR Server，也不產生 clinical advice。

@@ -104,3 +104,19 @@ docker compose exec app php artisan migrate --seed
 - `DOCKER.md`
 - `docs/README.md`
 - `docs/frontend/README.md`
+
+## Phase 10B Dev-only Mock Ingestion Prototype
+
+- `docs/fhir/dev-only-mock-ingestion-prototype.md`
+  - Phase 10B is a dev-only mock prototype; feature flag default disabled, no real PHI, no production FHIR Server, no direct FHIR write, manual review queue mock only, validation result mock only, candidate preview only, not production ingestion, not AI Agent runtime, not CDS runtime, and not SMART production.
+- `GET /dev/fhir/mock-ingestion`
+  - Dev-only preview page guarded by `FHIR_CONTROLLED_INGESTION_PROTOTYPE_ENABLED=true`, testing/local environment, `mode=mock`, and `allow_fhir_write=false`.
+- `POST /dev/fhir/mock-ingestion/preview`
+  - Dev-only JSON preview endpoint. It returns mock validation result, mock manual review queue item, and candidate preview only. Manual review queue mock is not signed-off; validation result mock is not live HAPI `$validate`; candidate preview is not a persisted FHIR Resource.
+- `docs/fhir/evidence/fhir-lesion-viewer-phase-10b-dev-only-mock-ingestion-prototype-20260512/`
+  - Phase 10B evidence package. Lesion Viewer remains read-only; no FHIR create/update/delete/patch/upload, no live HAPI `$validate`, no clinical advice, no automatic diagnosis, and no treatment recommendation.
+
+## FHIR Read-only Lesion Viewer Phase 10B.1
+
+- `docs/fhir/evidence/fhir-lesion-viewer-phase-10b1-prototype-stabilization-hardening-20260512/`
+  - Phase 10B.1 Prototype Stabilization / Hardening / Checkpoint Preparation. It hardens the existing dev-only mock ingestion prototype without adding runtime endpoints, without entering Phase 10C, without FHIR write, without real PHI, without production FHIR Server, without AI Agent runtime, without CDS runtime, and without SMART production activation.

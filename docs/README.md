@@ -244,3 +244,23 @@
 
 - `docs/fhir/evidence/fhir-lesion-viewer-phase-10a6-git-checkpoint-preparation-20260512/`
   - Phase 10A.6 Git checkpoint preparation and selective commit plan package. It records working tree snapshot, FHIR mainline file inventory, unrelated dirty file list, selective staging plan, commit split recommendation, branch recommendation, patch / backup recommendation, pre-commit checklist, post-commit checklist, route safety, runtime safety, regression tests, documentation validation, deferred issues, next phase plan, and safety boundary. It is not Phase 10B, not dev-only mock ingestion prototype, not runtime implementation, not Git cleanup, not automatic commit, and not automatic branch checkout.
+
+## FHIR Read-only Lesion Viewer Phase 10B
+
+- `docs/fhir/dev-only-mock-ingestion-prototype.md`
+  - Phase 10B 是 dev-only mock prototype; feature flag default disabled, no real PHI, no production FHIR Server, no direct FHIR write, manual review queue mock only, validation result mock only, candidate preview only, not production ingestion, not AI Agent runtime, not CDS runtime, and not SMART production.
+- `docs/fhir/no-write-fhir-boundary.md`
+  - Confirms no FHIR create/update/delete/patch/upload, no live HAPI `$validate`, and candidate preview 不等於 persisted FHIR Resource.
+- `docs/fhir/manual-review-queue-mock-plan.md`
+  - Confirms manual review queue mock 不等於 signed-off.
+- `docs/fhir/validation-result-mock-plan.md`
+  - Confirms validation result mock 不等於 live HAPI `$validate`.
+- `docs/fhir/evidence/fhir-lesion-viewer-phase-10b-dev-only-mock-ingestion-prototype-20260512/`
+  - Phase 10B evidence package with working tree snapshot, feature flag results, parser results, validation mock results, manual review queue mock results, candidate preview results, UI/API/route/runtime/no-write/regression/documentation results, deferred issues, safety boundary, and next phase plan.
+
+## FHIR Read-only Lesion Viewer Phase 10B.1
+
+- `docs/fhir/dev-only-mock-ingestion-prototype.md`
+  - Phase 10B.1 stabilization notes for the dev-only mock ingestion prototype: feature flag hardening, environment guard hardening, payload safety hardening, UI wording review, sample payload audit, no-write verification, and no Phase 10C.
+- `docs/fhir/evidence/fhir-lesion-viewer-phase-10b1-prototype-stabilization-hardening-20260512/`
+  - Phase 10B.1 evidence package for prototype stabilization / hardening / checkpoint preparation. It records working tree snapshot, feature flag and environment guard results, payload safety, validation result hardening, manual review queue hardening, candidate preview hardening, UI wording, sample payload audit, route safety, runtime safety, no-write verification, regression tests, documentation results, Phase 10B.2 checkpoint preparation, deferred issues, safety boundary, and next phase plan.

@@ -286,3 +286,29 @@ Phase 10A.6 is Git checkpoint preparation / selective commit planning. It is not
 - [evidence/fhir-lesion-viewer-phase-10a6-git-checkpoint-preparation-20260512/branch-recommendation.md](evidence/fhir-lesion-viewer-phase-10a6-git-checkpoint-preparation-20260512/branch-recommendation.md)
 - [evidence/fhir-lesion-viewer-phase-10a6-git-checkpoint-preparation-20260512/patch-backup-plan.md](evidence/fhir-lesion-viewer-phase-10a6-git-checkpoint-preparation-20260512/patch-backup-plan.md)
 - [evidence/fhir-lesion-viewer-phase-10a6-git-checkpoint-preparation-20260512/safety-boundary.md](evidence/fhir-lesion-viewer-phase-10a6-git-checkpoint-preparation-20260512/safety-boundary.md)
+
+## Phase 10B Dev-only Mock Ingestion Prototype
+
+Phase 10B 是 dev-only mock prototype。feature flag default disabled。no real PHI。no production FHIR Server。no direct FHIR write。manual review queue mock only。validation result mock only。candidate preview only。It is not production ingestion, not AI Agent runtime, not CDS runtime, and not SMART production.
+
+- [dev-only-mock-ingestion-prototype.md](dev-only-mock-ingestion-prototype.md)
+- [controlled-ingestion-prototype-planning.md](controlled-ingestion-prototype-planning.md)
+- [no-write-fhir-boundary.md](no-write-fhir-boundary.md)
+- [manual-review-queue-mock-plan.md](manual-review-queue-mock-plan.md)
+- [validation-result-mock-plan.md](validation-result-mock-plan.md)
+- [candidate-resource-staging-plan.md](candidate-resource-staging-plan.md)
+- [evidence/fhir-lesion-viewer-phase-10b-dev-only-mock-ingestion-prototype-20260512/](evidence/fhir-lesion-viewer-phase-10b-dev-only-mock-ingestion-prototype-20260512/)
+
+## Phase 10B.1 Prototype Stabilization / Hardening / Checkpoint Preparation
+
+Phase 10B.1 是 Prototype Stabilization / Hardening / Checkpoint Preparation。它不是 Phase 10C，不是 Controlled Write Path Review，不是 production ingestion，不是 production approval，不是 FHIR write pipeline，不是 AI Agent runtime，不是 CDS runtime，也不是 SMART production activation。
+
+Phase 10B.1 只補強 feature flag hardening、environment guard hardening、payload safety hardening、UI wording review、sample payload audit、no-write verification、runtime safety 與 Phase 10B.2 checkpoint preparation。
+
+- [dev-only-mock-ingestion-prototype.md](dev-only-mock-ingestion-prototype.md)
+- [controlled-ingestion-prototype-planning.md](controlled-ingestion-prototype-planning.md)
+- [no-write-fhir-boundary.md](no-write-fhir-boundary.md)
+- [manual-review-queue-mock-plan.md](manual-review-queue-mock-plan.md)
+- [validation-result-mock-plan.md](validation-result-mock-plan.md)
+- [candidate-resource-staging-plan.md](candidate-resource-staging-plan.md)
+- [evidence/fhir-lesion-viewer-phase-10b1-prototype-stabilization-hardening-20260512/](evidence/fhir-lesion-viewer-phase-10b1-prototype-stabilization-hardening-20260512/)
