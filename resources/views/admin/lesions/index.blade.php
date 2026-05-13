@@ -65,7 +65,8 @@
                             @empty
                                 <tr>
                                     <td colspan="9" class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-300">
-                                        目前沒有可顯示的 FHIR DiagnosticReport 只讀聚合資料。
+                                        <div class="font-semibold text-slate-700 dark:text-slate-100">目前沒有可顯示的 read-only lesion / clinical evidence data。</div>
+                                        <div class="mt-2">此頁只展示 server / FHIR 提供的資料；沒有資料時不會在此頁產生新資料、檔案匯入或臨床寫入流程。</div>
                                     </td>
                                 </tr>
                             @endforelse

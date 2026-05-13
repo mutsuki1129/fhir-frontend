@@ -27,6 +27,11 @@ class LesionViewerUiTest extends TestCase
                 $response->assertDontSee($label, false);
             }
         }
+
+        $this->assertStringContainsString(
+            '同意與簽核參照（僅供檢視）',
+            file_get_contents(resource_path('views/admin/lesions/show.blade.php')),
+        );
     }
 
     public function test_sidebar_and_dashboard_include_lesion_viewer_entry(): void
@@ -63,7 +68,8 @@ class LesionViewerUiTest extends TestCase
         $response = $this->get('/lesions')
             ->assertOk()
             ->assertSee('目前顯示的是 FHIR DiagnosticReport 聚合後的只讀病灶展示資料。')
-            ->assertSee('目前沒有可顯示的 FHIR DiagnosticReport 只讀聚合資料。');
+            ->assertSee('目前沒有可顯示的 read-only lesion / clinical evidence data。')
+            ->assertSee('此頁只展示 server / FHIR 提供的資料；沒有資料時不會在此頁產生新資料、檔案匯入或臨床寫入流程。');
 
         foreach ($this->forbiddenLabels() as $label) {
             $response->assertDontSee($label, false);

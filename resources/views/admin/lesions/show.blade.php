@@ -233,7 +233,7 @@
 
             @if (filled(data_get($lesion, 'enrichment.consents')))
                 <section class="mt-5 rounded-md border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-gray-800">
-                    <h2 class="text-lg font-semibold text-slate-950 dark:text-white">同意 / 簽核參照</h2>
+                    <h2 class="text-lg font-semibold text-slate-950 dark:text-white">同意與簽核參照（僅供檢視）</h2>
                     <div class="mt-4 overflow-x-auto">
                         <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-700">
                             <thead>

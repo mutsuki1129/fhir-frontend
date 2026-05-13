@@ -27,16 +27,20 @@
     <div class="notice">
         <strong>Safety boundary:</strong> Dev-only, Mock-only, No real PHI, No production FHIR Server,
         No direct FHIR write, No AI Agent runtime, No CDS runtime, No SMART production,
-        Feature flag guarded, Candidate preview only.
+        Feature flag guarded, Candidate preview only. Not formal ingestion, Not lesion CRUD,
+        Not FHIR persistence.
     </div>
 
     <div class="grid" aria-label="Feature flag status">
         <div class="badge">Flag: {{ $prototypeConfig['enabled'] ? 'enabled for this environment' : 'disabled' }}</div>
         <div class="badge">Mode: {{ $prototypeConfig['mode'] }}</div>
-        <div class="badge">FHIR write: {{ $prototypeConfig['allow_fhir_write'] ? 'blocked by guard' : 'false' }}</div>
+        <div class="badge">FHIR write: {{ $prototypeConfig['allow_fhir_write'] ? 'blocked by guard' : 'noFHIRWrite=true' }}</div>
         <div class="badge">Runtime: dev-mock-only</div>
         <div class="badge">Feature flag guarded</div>
-        <div class="badge">Candidate preview only</div>
+        <div class="badge">Preview: preview-only</div>
+        <div class="badge">Persistence: persisted=false</div>
+        <div class="badge">Signoff: signedOff=false</div>
+        <div class="badge">Queue status: pending-review</div>
     </div>
 
     <h2>Mock Payload</h2>
