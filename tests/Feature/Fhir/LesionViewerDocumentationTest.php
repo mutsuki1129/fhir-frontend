@@ -57,6 +57,7 @@ class LesionViewerDocumentationTest extends TestCase
     public function test_lesion_viewer_documents_define_read_only_positioning_and_boundaries(): void
     {
         $content = $this->lesionDocsContent();
+        $contractContent = file_get_contents(base_path('docs/fhir/lesion-viewer-data-contract.md'));
 
         $this->assertStringContainsString('FHIR Read-only Lesion Viewer', $content);
         $this->assertStringContainsString('Lesion is not a new FHIR Resource', $content);
@@ -67,9 +68,9 @@ class LesionViewerDocumentationTest extends TestCase
         $this->assertStringContainsString('DiagnosticReport does not equal automatic diagnosis', $content);
         $this->assertStringContainsString('AI-generated content is not clinician-confirmed content', $content);
         $this->assertStringContainsString('lesion-report-001', $content);
-        $this->assertStringContainsString('read-only-aggregation-v1', $content);
-        $this->assertStringContainsString('read-only-aggregation-v2', $content);
-        $this->assertStringContainsString('read-only-aggregation-v3', $content);
+        $this->assertStringContainsString('read-only-aggregation-v3', $contractContent);
+        $this->assertStringNotContainsString('read-only-aggregation-v1', $contractContent);
+        $this->assertStringNotContainsString('read-only-aggregation-v2', $contractContent);
         $this->assertStringContainsString('Patient enrichment', $content);
         $this->assertStringContainsString('Observation values are displayed only', $content);
         $this->assertStringContainsString('Patient enrichment must not display full name', $content);
@@ -87,6 +88,9 @@ class LesionViewerDocumentationTest extends TestCase
         }
         $this->assertStringContainsString('live FHIR write/update/delete', $content);
         $this->assertStringContainsString('POST/PATCH/DELETE lesion route', $content);
+        $this->assertStringContainsString('Gateway ingestion', $contractContent);
+        $this->assertStringContainsString('No clinical advice', $contractContent);
+        $this->assertStringContainsString('No live FHIR write/update/delete', $contractContent);
     }
 
     public function test_lesion_viewer_documents_avoid_misleading_activation_language(): void

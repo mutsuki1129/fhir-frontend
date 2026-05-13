@@ -312,3 +312,10 @@ Phase 10B.1 只補強 feature flag hardening、environment guard hardening、pay
 - [validation-result-mock-plan.md](validation-result-mock-plan.md)
 - [candidate-resource-staging-plan.md](candidate-resource-staging-plan.md)
 - [evidence/fhir-lesion-viewer-phase-10b1-prototype-stabilization-hardening-20260512/](evidence/fhir-lesion-viewer-phase-10b1-prototype-stabilization-hardening-20260512/)
+
+## Phase 10C Read-only Contract and Preview QA
+
+Phase 10C covers API contract QA, dev-only mock ingestion preview QA, encoding / mojibake review, and evidence packaging. It is documentation and QA only: no runtime feature development, no FHIR write, no lesion CRUD, no formal ingestion, no approval/signoff persistence, and no HAPI/docker/env/SMART/CDS/Gateway runtime changes.
+- [lesion-viewer-data-contract.md](lesion-viewer-data-contract.md)
+- [dev-only-mock-ingestion-prototype.md](dev-only-mock-ingestion-prototype.md)
+- [evidence/fhir-lesion-viewer-phase-10c-readonly-contract-and-preview-qa-20260513/](evidence/fhir-lesion-viewer-phase-10c-readonly-contract-and-preview-qa-20260513/)

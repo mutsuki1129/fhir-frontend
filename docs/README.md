@@ -264,3 +264,10 @@
   - Phase 10B.1 stabilization notes for the dev-only mock ingestion prototype: feature flag hardening, environment guard hardening, payload safety hardening, UI wording review, sample payload audit, no-write verification, and no Phase 10C.
 - `docs/fhir/evidence/fhir-lesion-viewer-phase-10b1-prototype-stabilization-hardening-20260512/`
   - Phase 10B.1 evidence package for prototype stabilization / hardening / checkpoint preparation. It records working tree snapshot, feature flag and environment guard results, payload safety, validation result hardening, manual review queue hardening, candidate preview hardening, UI wording, sample payload audit, route safety, runtime safety, no-write verification, regression tests, documentation results, Phase 10B.2 checkpoint preparation, deferred issues, safety boundary, and next phase plan.
+
+## FHIR Read-only Lesion Viewer Phase 10C
+
+- `docs/fhir/lesion-viewer-data-contract.md`
+  - Phase 10C aligned read-only lesion viewer contract; uses `read-only-aggregation-v3`, confirms lesion API remains read-only, and does not add lesion CRUD, FHIR write, formal ingestion, clinical advice, approval persistence, or signoff persistence.
+- `docs/fhir/evidence/fhir-lesion-viewer-phase-10c-readonly-contract-and-preview-qa-20260513/`
+  - Phase 10C evidence package for API contract QA, dev-only mock ingestion preview QA, encoding / mojibake review, route safety, no-write boundary, targeted test results, remaining risks, and Phase 10C.6 selective commit planning. It records no HAPI/docker/env/SMART/CDS/Gateway runtime changes.
