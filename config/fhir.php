@@ -3,6 +3,11 @@
 return [
     'frontend_read_only' => filter_var(env('FHIR_FRONTEND_READ_ONLY', true), FILTER_VALIDATE_BOOLEAN),
     'lesion_viewer_source' => env('FHIR_LESION_VIEWER_SOURCE', 'mock'),
+    'controlled_ingestion_prototype' => [
+        'enabled' => filter_var(env('FHIR_CONTROLLED_INGESTION_PROTOTYPE_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
+        'mode' => env('FHIR_CONTROLLED_INGESTION_PROTOTYPE_MODE', 'mock'),
+        'allow_fhir_write' => false,
+    ],
     'gateway_report_only' => filter_var(env('FHIR_GATEWAY_REPORT_ONLY', true), FILTER_VALIDATE_BOOLEAN),
     'gateway_enforce_read' => filter_var(env('FHIR_GATEWAY_ENFORCE_READ', false), FILTER_VALIDATE_BOOLEAN),
     'gateway_enforce_write' => filter_var(env('FHIR_GATEWAY_ENFORCE_WRITE', false), FILTER_VALIDATE_BOOLEAN),

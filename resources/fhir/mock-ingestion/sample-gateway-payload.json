@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "0.1-draft",
+  "messageId": "msg-001",
+  "correlationId": "case-001",
+  "sourceSystem": {
+    "systemId": "mock-agent-system",
+    "systemType": "ai-agent",
+    "displayName": "Mock AI Agent"
+  },
+  "agentContext": {
+    "agentId": "mock-agent-001",
+    "agentRole": "clinical-reasoning",
+    "modelVersion": "mock-model-v0",
+    "runtime": "dev-mock-only"
+  },
+  "subject": {
+    "patientReference": "Patient/mock-patient-001",
+    "displayId": "MOCK-P-001"
+  },
+  "event": {
+    "eventTime": "2026-05-12T00:00:00Z",
+    "encounterReference": "Encounter/mock-encounter-001",
+    "eventType": "report"
+  },
+  "trust": {
+    "dataOrigin": "ai-generated",
+    "reviewStatus": "pending-review",
+    "reviewedBy": null,
+    "reviewedAt": null
+  },
+  "payload": {
+    "observations": [
+      {
+        "title": "Mock observation candidate",
+        "valueSummary": "mock-value-not-for-clinical-use"
+      }
+    ],
+    "diagnosticReports": [
+      {
+        "title": "Mock lesion-related report candidate",
+        "summary": "Synthetic mock summary. Not clinical guidance."
+      }
+    ],
+    "conditions": [],
+    "documents": [],
+    "consents": []
+  },
+  "provenance": {
+    "sourceReferences": [],
+    "notes": "Synthetic mock payload only. No real PHI."
+  }
+}

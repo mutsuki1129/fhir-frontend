@@ -67,5 +67,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'isAdmin' => \App\Http\Middleware\IsAdmin::class,
         'isUser' => \App\Http\Middleware\IsUser::class,
+        'fhir.controlled_ingestion_prototype' => \App\Http\Middleware\EnsureControlledIngestionPrototypeEnabled::class,
     ];
 }

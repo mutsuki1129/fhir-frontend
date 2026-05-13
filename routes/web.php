@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Dev\FhirMockIngestionController;
 use App\Http\Controllers\EncounterController;
 use App\Http\Controllers\FhirPortalController;
 use App\Http\Controllers\FhirMetadataController;
@@ -44,6 +45,16 @@ Route::get('/locale/{locale}', function (string $locale) {
 
     return redirect()->back();
 })->name('locale.switch');
+
+Route::middleware('fhir.controlled_ingestion_prototype')
+    ->prefix('dev/fhir/mock-ingestion')
+    ->name('dev.fhir.mock-ingestion.')
+    ->group(function () {
+        Route::get('/', [FhirMockIngestionController::class, 'index'])->name('index');
+        Route::post('/preview', [FhirMockIngestionController::class, 'preview'])
+            ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+            ->name('preview');
+    });
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
