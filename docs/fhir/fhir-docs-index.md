@@ -12,6 +12,7 @@
 - [evidence/fhir-lesion-viewer-phase-7-condition-document-consent-linking-20260512/](evidence/fhir-lesion-viewer-phase-7-condition-document-consent-linking-20260512/)
 - [evidence/fhir-lesion-viewer-phase-1-to-7-handoff-20260512/](evidence/fhir-lesion-viewer-phase-1-to-7-handoff-20260512/)
 - [evidence/fhir-lesion-viewer-phase-8-stabilization-handoff-20260512/](evidence/fhir-lesion-viewer-phase-8-stabilization-handoff-20260512/)
+- [evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/](evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/)
 
 ## IG Mapping / Validation
 
@@ -319,3 +320,8 @@ Phase 10C covers API contract QA, dev-only mock ingestion preview QA, encoding /
 - [lesion-viewer-data-contract.md](lesion-viewer-data-contract.md)
 - [dev-only-mock-ingestion-prototype.md](dev-only-mock-ingestion-prototype.md)
 - [evidence/fhir-lesion-viewer-phase-10c-readonly-contract-and-preview-qa-20260513/](evidence/fhir-lesion-viewer-phase-10c-readonly-contract-and-preview-qa-20260513/)
+
+## Phase 10E Documentation-only Dirty Tree Cleanup Plan
+
+Phase 10E is a documentation-only dirty tree cleanup plan for the read-only lesion viewer track. It records no runtime change, no route/controller/service change, no env/docker/HAPI/SMART/CDS/Gateway change, no lesion CRUD, no formal ingestion, no FHIR persistence, and preservation of unrelated dirty/untracked files.
+- [evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/](evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/)

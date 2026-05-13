@@ -271,3 +271,8 @@
   - Phase 10C aligned read-only lesion viewer contract; uses `read-only-aggregation-v3`, confirms lesion API remains read-only, and does not add lesion CRUD, FHIR write, formal ingestion, clinical advice, approval persistence, or signoff persistence.
 - `docs/fhir/evidence/fhir-lesion-viewer-phase-10c-readonly-contract-and-preview-qa-20260513/`
   - Phase 10C evidence package for API contract QA, dev-only mock ingestion preview QA, encoding / mojibake review, route safety, no-write boundary, targeted test results, remaining risks, and Phase 10C.6 selective commit planning. It records no HAPI/docker/env/SMART/CDS/Gateway runtime changes.
+
+## FHIR Read-only Lesion Viewer Phase 10E
+
+- `docs/fhir/evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/`
+  - Phase 10E documentation-only dirty tree cleanup plan for the read-only lesion viewer track; no runtime change, no route/controller/service change, no env/docker/HAPI/SMART/CDS/Gateway change, no lesion CRUD, no formal ingestion, no FHIR persistence, and unrelated dirty/untracked files are preserved.
