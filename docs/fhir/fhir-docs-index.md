@@ -13,6 +13,7 @@
 - [evidence/fhir-lesion-viewer-phase-1-to-7-handoff-20260512/](evidence/fhir-lesion-viewer-phase-1-to-7-handoff-20260512/)
 - [evidence/fhir-lesion-viewer-phase-8-stabilization-handoff-20260512/](evidence/fhir-lesion-viewer-phase-8-stabilization-handoff-20260512/)
 - [evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/](evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/)
+- [evidence/fhir-lesion-viewer-phase-10i-j1-mock-ingestion-middleware-diagnosis-20260513/](evidence/fhir-lesion-viewer-phase-10i-j1-mock-ingestion-middleware-diagnosis-20260513/)
 
 ## IG Mapping / Validation
 
@@ -325,3 +326,8 @@ Phase 10C covers API contract QA, dev-only mock ingestion preview QA, encoding /
 
 Phase 10E is a documentation-only dirty tree cleanup plan for the read-only lesion viewer track. It records no runtime change, no route/controller/service change, no env/docker/HAPI/SMART/CDS/Gateway change, no lesion CRUD, no formal ingestion, no FHIR persistence, and preservation of unrelated dirty/untracked files.
 - [evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/](evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/)
+
+## Phase 10I-J1 Mock Ingestion Middleware Diagnosis
+
+Phase 10I-J1 is mock ingestion middleware / feature-flag diagnosis evidence confirming that Docker 404 for `/dev/fhir/mock-ingestion` is expected fail-closed behavior when the dev-only controlled ingestion prototype flag is disabled. It is documentation-only evidence: no runtime change, no route/controller/service/view/config/env/docker change, no cache clear, no Docker restart/rebuild, feature flag remains disabled, no lesion CRUD, no formal ingestion, no FHIR persistence, no approval/signoff persistence, and unrelated dirty/untracked files are preserved.
+- [evidence/fhir-lesion-viewer-phase-10i-j1-mock-ingestion-middleware-diagnosis-20260513/](evidence/fhir-lesion-viewer-phase-10i-j1-mock-ingestion-middleware-diagnosis-20260513/)
