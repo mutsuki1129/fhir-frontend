@@ -14,6 +14,7 @@
 - [evidence/fhir-lesion-viewer-phase-8-stabilization-handoff-20260512/](evidence/fhir-lesion-viewer-phase-8-stabilization-handoff-20260512/)
 - [evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/](evidence/fhir-lesion-viewer-phase-10e-dirty-tree-cleanup-plan-20260513/)
 - [evidence/fhir-lesion-viewer-phase-10i-j1-mock-ingestion-middleware-diagnosis-20260513/](evidence/fhir-lesion-viewer-phase-10i-j1-mock-ingestion-middleware-diagnosis-20260513/)
+- [evidence/fhir-lesion-viewer-phase-10k-b-demo-readiness-review-20260513/](evidence/fhir-lesion-viewer-phase-10k-b-demo-readiness-review-20260513/)
 
 ## IG Mapping / Validation
 
@@ -331,3 +332,8 @@ Phase 10E is a documentation-only dirty tree cleanup plan for the read-only lesi
 
 Phase 10I-J1 is mock ingestion middleware / feature-flag diagnosis evidence confirming that Docker 404 for `/dev/fhir/mock-ingestion` is expected fail-closed behavior when the dev-only controlled ingestion prototype flag is disabled. It is documentation-only evidence: no runtime change, no route/controller/service/view/config/env/docker change, no cache clear, no Docker restart/rebuild, feature flag remains disabled, no lesion CRUD, no formal ingestion, no FHIR persistence, no approval/signoff persistence, and unrelated dirty/untracked files are preserved.
 - [evidence/fhir-lesion-viewer-phase-10i-j1-mock-ingestion-middleware-diagnosis-20260513/](evidence/fhir-lesion-viewer-phase-10i-j1-mock-ingestion-middleware-diagnosis-20260513/)
+
+## Phase 10K-B Read-only Viewer Demo Readiness Evidence
+
+Phase 10K-B is read-only viewer demo readiness evidence recording the Conditional Go for internal demo decision, demo script, demo-able scope, explain-only scope, and remaining risks. It is documentation-only evidence: no runtime change, no route/controller/service/view/config/env/docker change, no cache clear, no Docker restart/rebuild, feature flag remains disabled, no lesion CRUD, no formal ingestion, no FHIR persistence, no approval/signoff persistence, unrelated dirty/untracked files are preserved, and internal demo is conditional on using Docker URL and an existing authenticated browser session.
+- [evidence/fhir-lesion-viewer-phase-10k-b-demo-readiness-review-20260513/](evidence/fhir-lesion-viewer-phase-10k-b-demo-readiness-review-20260513/)
