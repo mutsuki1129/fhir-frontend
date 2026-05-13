@@ -2,6 +2,7 @@
 
 namespace App\Support\Fhir;
 
+use App\Support\Text\DisplayStringSanitizer;
 use App\ViewModels\DocumentReferenceVM;
 use Carbon\CarbonImmutable;
 
@@ -24,7 +25,7 @@ class DocumentReferenceMapper
         if (!is_string($title) || $title === '') {
             $title = data_get($resource, 'description');
         }
-        $title = is_string($title) && $title !== '' ? $title : null;
+        $title = is_string($title) && $title !== '' ? DisplayStringSanitizer::sanitize($title) : null;
 
         $url = data_get($resource, 'content.0.attachment.url');
         $url = is_string($url) && $url !== '' ? $url : null;
@@ -83,6 +84,31 @@ class DocumentReferenceMapper
         }
 
         return $resource;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function toFacadePayload(DocumentReferenceVM $vm): array
+    {
+        $title = trim((string) ($vm->title ?? ''));
+        $url = trim((string) ($vm->url ?? ''));
+
+        $payload = [
+            'contentType' => $vm->contentType ?: 'text/uri-list',
+            'url' => $url,
+        ];
+
+        if ($title !== '') {
+            $payload['title'] = $title;
+            $payload['description'] = $title;
+        }
+
+        if ($vm->date) {
+            $payload['date'] = $vm->date;
+        }
+
+        return $payload;
     }
 
     private static function extractIdFromReference(string $reference): string

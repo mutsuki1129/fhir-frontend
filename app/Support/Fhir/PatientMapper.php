@@ -2,6 +2,7 @@
 
 namespace App\Support\Fhir;
 
+use App\Support\Text\DisplayStringSanitizer;
 use App\ViewModels\PatientVM;
 use Illuminate\Support\Str;
 
@@ -29,16 +30,20 @@ class PatientMapper
     public static function fromFhirPatient(array $resource): PatientVM
     {
         $name = '';
+        $familyName = null;
+        $givenName = null;
         $nameEntry = $resource['name'][0] ?? null;
         if (is_array($nameEntry)) {
+            $familyName = self::asString($nameEntry['family'] ?? null);
+            $given = $nameEntry['given'] ?? [];
+            $givenText = is_array($given) ? implode(' ', array_filter(array_map('strval', $given))) : '';
+            $givenName = self::asString($givenText);
             $name = (string) ($nameEntry['text'] ?? '');
             if ($name === '') {
-                $family = (string) ($nameEntry['family'] ?? '');
-                $given = $nameEntry['given'] ?? [];
-                $givenText = is_array($given) ? implode(' ', array_filter(array_map('strval', $given))) : '';
-                $name = trim("{$givenText} {$family}");
+                $name = trim("{$givenText} {$familyName}");
             }
         }
+        $name = DisplayStringSanitizer::sanitize($name) ?? (string) ($resource['id'] ?? '');
 
         $email = null;
         $phone = null;
@@ -51,11 +56,15 @@ class PatientMapper
             if (!is_string($value) || $value === '') {
                 continue;
             }
+            $safeValue = DisplayStringSanitizer::sanitize($value);
+            if ($safeValue === null) {
+                continue;
+            }
             if ($system === 'email' && $email === null) {
-                $email = $value;
+                $email = $safeValue;
             }
             if ($system === 'phone' && $phone === null) {
-                $phone = $value;
+                $phone = $safeValue;
             }
         }
 
@@ -63,6 +72,12 @@ class PatientMapper
         $photo = $resource['photo'][0] ?? null;
         if (is_array($photo) && isset($photo['url']) && is_string($photo['url'])) {
             $photoUrl = $photo['url'];
+        }
+
+        $address = null;
+        $addressEntry = $resource['address'][0] ?? null;
+        if (is_array($addressEntry)) {
+            $address = self::asString($addressEntry['text'] ?? null);
         }
 
         $generalPractitionerId = null;
@@ -73,7 +88,7 @@ class PatientMapper
         }
         $gpDisplay = $resource['generalPractitioner'][0]['display'] ?? null;
         if (is_string($gpDisplay) && $gpDisplay !== '') {
-            $generalPractitionerDisplay = $gpDisplay;
+            $generalPractitionerDisplay = DisplayStringSanitizer::sanitize($gpDisplay);
         }
 
         return new PatientVM(
@@ -96,6 +111,9 @@ class PatientMapper
             nhiCardNumber: self::extractIdentifierBySystem($resource, self::ID_SYSTEM_NHI),
             generalPractitionerId: $generalPractitionerId,
             generalPractitionerDisplay: $generalPractitionerDisplay,
+            familyName: $familyName,
+            givenName: $givenName,
+            address: $address,
         );
     }
 
@@ -105,21 +123,31 @@ class PatientMapper
      */
     public static function toFhirPatient(PatientVM $vm, ?array $existingResource = null): array
     {
-        $identifierSystem = (string) config('services.fhir.identifier_system', 'urn:app:patient');
+        $identifierSystem = (string) config('services.fhir.identifier_system', FhirCodeSystems::PATIENT_IDENTIFIER);
         $identifierValue = self::extractIdentifierValue($existingResource) ?? self::generateIdentifierValue($vm);
         $gender = self::extractGender($existingResource) ?? 'unknown';
+        $displayName = DisplayStringSanitizer::sanitize($vm->name) ?? ($vm->id !== '' ? $vm->id : 'Unknown Patient');
+        $familyName = DisplayStringSanitizer::sanitize($vm->familyName);
+        $givenName = DisplayStringSanitizer::sanitize($vm->givenName);
 
         $resource = [
             'resourceType' => 'Patient',
             'identifier' => [],
             'name' => [
                 [
-                    'text' => $vm->name,
+                    'text' => $displayName,
                 ],
             ],
             'gender' => $gender,
             'telecom' => [],
         ];
+
+        if ($familyName) {
+            $resource['name'][0]['family'] = $familyName;
+        }
+        if ($givenName) {
+            $resource['name'][0]['given'] = [$givenName];
+        }
 
         if ($vm->id !== '') {
             $resource['id'] = $vm->id;
@@ -168,6 +196,12 @@ class PatientMapper
         if ($vm->gender) {
             $resource['gender'] = $vm->gender;
         }
+        $address = DisplayStringSanitizer::sanitize($vm->address);
+        if ($address) {
+            $resource['address'] = [
+                ['text' => $address],
+            ];
+        }
         if ($vm->generalPractitionerId) {
             $resource['generalPractitioner'] = [[
                 'reference' => 'Practitioner/' . $vm->generalPractitionerId,
@@ -188,9 +222,54 @@ class PatientMapper
         self::pushStringExtension($extensions, self::EXT_BIOMARKERS, $vm->biomarkers);
         if ($extensions !== []) {
             $resource['extension'] = $extensions;
+        } elseif (is_array($existingResource) && isset($existingResource['extension']) && is_array($existingResource['extension'])) {
+            $resource['extension'] = $existingResource['extension'];
         }
 
         return $resource;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function toIntakeFacadePayload(PatientVM $vm): array
+    {
+        [$family, $given] = self::splitDisplayName($vm->name);
+
+        $payload = [
+            'patient' => array_filter([
+                'id' => $vm->id !== '' ? $vm->id : null,
+                'family' => $family !== '' ? $family : null,
+                'given' => $given !== '' ? $given : ($family !== '' ? $family : null),
+                'gender' => $vm->gender,
+                'birthDate' => $vm->birthDate,
+                'nationalId' => $vm->nationalId,
+                'nhiCardNo' => $vm->nhiCardNumber,
+            ], fn ($value) => $value !== null && $value !== ''),
+            'intake' => array_filter([
+                'educationLevel' => $vm->education,
+                'occupation' => $vm->occupation,
+                'monthlyIncome' => self::numericOrNull($vm->income),
+                'monthlyExpense' => self::numericOrNull($vm->expense),
+                'hobby' => $vm->interests,
+                'psychologicalTraits' => $vm->psychologicalTraits,
+                'behaviorPattern' => $vm->behaviorPatterns,
+            ], fn ($value) => $value !== null && $value !== ''),
+        ];
+
+        if ($vm->generalPractitionerId) {
+            $payload['doctor'] = [
+                'id' => $vm->generalPractitionerId,
+            ];
+        }
+
+        if ($vm->biomarkers) {
+            $payload['extraAttributes'] = [
+                'biomarkers' => $vm->biomarkers,
+            ];
+        }
+
+        return array_filter($payload, fn ($value) => $value !== []);
     }
 
     /**
@@ -201,6 +280,23 @@ class PatientMapper
         if (!is_array($resource)) {
             return null;
         }
+        $identifierSystem = (string) config('services.fhir.identifier_system', FhirCodeSystems::PATIENT_IDENTIFIER);
+
+        // Keep only the app-owned identifier as source of truth for internal id mapping.
+        foreach (($resource['identifier'] ?? []) as $identifier) {
+            if (!is_array($identifier)) {
+                continue;
+            }
+            if (($identifier['system'] ?? null) !== $identifierSystem) {
+                continue;
+            }
+            $value = $identifier['value'] ?? null;
+            if (is_string($value) && trim($value) !== '') {
+                return trim($value);
+            }
+        }
+
+        // Legacy fallback for old records without app identifier.
         foreach (($resource['identifier'] ?? []) as $identifier) {
             if (!is_array($identifier)) {
                 continue;
@@ -241,7 +337,7 @@ class PatientMapper
             }
             $value = $extension['valueString'] ?? null;
             if (is_string($value) && trim($value) !== '') {
-                return $value;
+                return DisplayStringSanitizer::sanitize($value);
             }
         }
 
@@ -259,7 +355,7 @@ class PatientMapper
             }
             $value = $identifier['value'] ?? null;
             if (is_string($value) && trim($value) !== '') {
-                return $value;
+                return DisplayStringSanitizer::sanitize($value);
             }
         }
 
@@ -271,7 +367,7 @@ class PatientMapper
      */
     private static function pushStringExtension(array &$extensions, string $url, ?string $value): void
     {
-        $trimmed = trim((string) $value);
+        $trimmed = DisplayStringSanitizer::sanitize((string) $value) ?? '';
         if ($trimmed === '') {
             return;
         }
@@ -283,7 +379,10 @@ class PatientMapper
 
     private static function asString(mixed $value): ?string
     {
-        return is_string($value) && trim($value) !== '' ? $value : null;
+        if (!is_string($value)) {
+            return null;
+        }
+        return DisplayStringSanitizer::sanitize($value);
     }
 
     private static function generateIdentifierValue(PatientVM $vm): string
@@ -293,5 +392,34 @@ class PatientMapper
         }
 
         return 'patient-' . Str::uuid()->toString();
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private static function splitDisplayName(string $name): array
+    {
+        $trimmed = trim($name);
+        if ($trimmed === '') {
+            return ['', ''];
+        }
+
+        $parts = preg_split('/\s+/u', $trimmed) ?: [];
+        if (count($parts) <= 1) {
+            return [$trimmed, ''];
+        }
+
+        $family = array_shift($parts);
+        return [(string) $family, trim(implode(' ', $parts))];
+    }
+
+    private static function numericOrNull(?string $value): float|int|null
+    {
+        if ($value === null || trim($value) === '' || !is_numeric($value)) {
+            return null;
+        }
+
+        $number = (float) $value;
+        return floor($number) === $number ? (int) $number : $number;
     }
 }

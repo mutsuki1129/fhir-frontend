@@ -2,6 +2,7 @@
 
 namespace App\Support\Fhir;
 
+use App\Support\Text\DisplayStringSanitizer;
 use App\ViewModels\TemperatureObservationVM;
 use Carbon\CarbonImmutable;
 
@@ -14,7 +15,6 @@ class ObservationMapper
      * in docs/frontend/phase3-field-sync-baseline.md for later incremental mapper expansion.
      */
     private const LOINC_BODY_TEMPERATURE = '8310-5';
-    private const INTAKE_SYSTEM = 'https://example.org/fhir/CodeSystem/patient-intake';
 
     /**
      * @param array<string, mixed> $resource
@@ -23,15 +23,17 @@ class ObservationMapper
     {
         $subjectReference = (string) data_get($resource, 'subject.reference', '');
         $performerReference = (string) data_get($resource, 'performer.0.reference', '');
+        $encounterReference = (string) data_get($resource, 'encounter.reference', '');
 
         $patientId = self::extractIdFromReference($subjectReference);
         $performerId = self::extractIdFromReference($performerReference);
+        $encounterId = self::extractIdFromReference($encounterReference);
 
         $isTemperature = self::isTemperatureObservation($resource);
         $valueCelsius = $isTemperature ? self::extractTemperatureValue($resource) : 0.0;
 
         $noteText = data_get($resource, 'note.0.text');
-        $note = is_string($noteText) ? trim($noteText) : null;
+        $note = is_string($noteText) ? DisplayStringSanitizer::sanitize($noteText) : null;
         if (!$isTemperature) {
             $summary = self::buildObservationSummary($resource);
             if ($summary !== null && $summary !== '') {
@@ -48,6 +50,7 @@ class ObservationMapper
             valueCelsius: $valueCelsius,
             effectiveDateTime: self::emptyToNull((string) data_get($resource, 'effectiveDateTime', '')),
             note: $note,
+            encounterId: $encounterId !== '' ? $encounterId : null,
         );
     }
 
@@ -62,7 +65,7 @@ class ObservationMapper
             'code' => [
                 'coding' => [
                     [
-                        'system' => 'http://loinc.org',
+                        'system' => FhirCodeSystems::LOINC,
                         'code' => self::LOINC_BODY_TEMPERATURE,
                         'display' => 'Body temperature',
                     ],
@@ -75,7 +78,7 @@ class ObservationMapper
             'valueQuantity' => [
                 'value' => $vm->valueCelsius,
                 'unit' => 'Cel',
-                'system' => 'http://unitsofmeasure.org',
+                'system' => FhirCodeSystems::UCUM,
                 'code' => 'Cel',
             ],
         ];
@@ -101,6 +104,11 @@ class ObservationMapper
 
         if ($vm->effectiveDateTime) {
             $resource['effectiveDateTime'] = CarbonImmutable::parse($vm->effectiveDateTime)->toIso8601String();
+        }
+
+        $encounterReference = EncounterMapper::referenceForId($vm->encounterId);
+        if ($encounterReference !== null) {
+            $resource['encounter'] = $encounterReference;
         }
 
         if ($vm->note) {
@@ -134,13 +142,26 @@ class ObservationMapper
             return true;
         }
 
-        return self::hasPatientIntakeCodeSystem($resource);
+        return self::hasPatientIntakeCodeSystem($resource)
+            || self::hasPlainTextIntakeSignature($resource);
     }
 
     /**
      * @param array<string, mixed> $resource
      */
     public static function isTemperatureObservation(array $resource): bool
+    {
+        return self::hasBodyTemperatureCode($resource)
+            && self::hasStrictCelsiusValueQuantity($resource);
+    }
+
+    /**
+     * Legacy-tolerant temperature detection kept only for explicit migration or
+     * cleanup callers. Normal Rekam listing uses strict temperature recognition.
+     *
+     * @param array<string, mixed> $resource
+     */
+    public static function isLegacyTemperatureObservation(array $resource): bool
     {
         return self::hasBodyTemperatureCode($resource)
             || self::hasCelsiusQuantity($resource)
@@ -197,12 +218,23 @@ class ObservationMapper
             if (!is_array($coding)) {
                 continue;
             }
-            if ((string) ($coding['code'] ?? '') === self::LOINC_BODY_TEMPERATURE) {
+            if ((string) ($coding['system'] ?? '') === FhirCodeSystems::LOINC
+                && (string) ($coding['code'] ?? '') === self::LOINC_BODY_TEMPERATURE) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * @param array<string, mixed> $resource
+     */
+    private static function hasStrictCelsiusValueQuantity(array $resource): bool
+    {
+        return data_get($resource, 'valueQuantity') !== null
+            && (string) data_get($resource, 'valueQuantity.system', '') === FhirCodeSystems::UCUM
+            && (string) data_get($resource, 'valueQuantity.code', '') === 'Cel';
     }
 
     /**
@@ -219,12 +251,48 @@ class ObservationMapper
             if (!is_array($coding)) {
                 continue;
             }
-            if ((string) ($coding['system'] ?? '') === self::INTAKE_SYSTEM) {
+            $system = (string) ($coding['system'] ?? '');
+            if (in_array($system, [FhirCodeSystems::OBSERVATION, FhirCodeSystems::LEGACY_PATIENT_INTAKE], true)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Support intake-style Observation payloads that only provide code.text
+     * (without code.coding.system), as seen in transaction bundle imports.
+     *
+     * @param array<string, mixed> $resource
+     */
+    private static function hasPlainTextIntakeSignature(array $resource): bool
+    {
+        $codings = data_get($resource, 'code.coding', []);
+        $hasAnyCodingSystem = false;
+        if (is_array($codings)) {
+            foreach ($codings as $coding) {
+                if (!is_array($coding)) {
+                    continue;
+                }
+                $system = trim((string) ($coding['system'] ?? ''));
+                if ($system !== '') {
+                    $hasAnyCodingSystem = true;
+                    break;
+                }
+            }
+        }
+        if ($hasAnyCodingSystem) {
+            return false;
+        }
+
+        $codeText = trim((string) data_get($resource, 'code.text', ''));
+        if ($codeText === '') {
+            return false;
+        }
+
+        $categoryCode = trim((string) data_get($resource, 'category.0.coding.0.code', ''));
+        return in_array($categoryCode, ['social-history', 'survey', 'laboratory'], true);
     }
 
     /**
@@ -278,17 +346,17 @@ class ObservationMapper
      */
     private static function buildObservationSummary(array $resource): ?string
     {
-        $codeText = trim((string) data_get($resource, 'code.text', ''));
+        $codeText = DisplayStringSanitizer::sanitize((string) data_get($resource, 'code.text', '')) ?? '';
         if ($codeText === '') {
-            $codeText = trim((string) data_get($resource, 'code.coding.0.display', ''));
+            $codeText = DisplayStringSanitizer::sanitize((string) data_get($resource, 'code.coding.0.display', '')) ?? '';
         }
         if ($codeText === '') {
-            $codeText = trim((string) data_get($resource, 'code.coding.0.code', ''));
+            $codeText = DisplayStringSanitizer::sanitize((string) data_get($resource, 'code.coding.0.code', '')) ?? '';
         }
 
-        $valueText = trim((string) data_get($resource, 'valueString', ''));
+        $valueText = DisplayStringSanitizer::sanitize((string) data_get($resource, 'valueString', '')) ?? '';
         if ($valueText === '') {
-            $valueText = trim((string) data_get($resource, 'valueCodeableConcept.text', ''));
+            $valueText = DisplayStringSanitizer::sanitize((string) data_get($resource, 'valueCodeableConcept.text', '')) ?? '';
         }
         if ($valueText === '') {
             $valueText = trim((string) data_get($resource, 'valueQuantity.value', ''));
@@ -316,6 +384,6 @@ class ObservationMapper
 
     private static function emptyToNull(string $value): ?string
     {
-        return $value !== '' ? $value : null;
+        return DisplayStringSanitizer::sanitize($value);
     }
 }

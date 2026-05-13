@@ -2,6 +2,7 @@
 
 namespace App\Support\Fhir;
 
+use App\Support\Text\DisplayStringSanitizer;
 use App\ViewModels\ConditionVM;
 use Carbon\CarbonImmutable;
 
@@ -18,7 +19,7 @@ class ConditionMapper
     public static function fromFhirCondition(array $resource): ConditionVM
     {
         $subjectReference = (string) data_get($resource, 'subject.reference', '');
-        $patientId = self::extractIdFromReference($subjectReference);
+        $patientId = self::extractRelativeReferenceId($subjectReference, 'Patient') ?? '';
 
         $codingCode = data_get($resource, 'code.coding.0.code');
         $code = is_string($codingCode) && $codingCode !== '' ? $codingCode : null;
@@ -31,21 +32,30 @@ class ConditionMapper
         $text = null;
         foreach ($textCandidates as $candidate) {
             if (is_string($candidate) && $candidate !== '') {
-                $text = $candidate;
+                $text = DisplayStringSanitizer::sanitize($candidate);
+                if ($text === null) {
+                    continue;
+                }
                 break;
             }
         }
 
         $noteText = data_get($resource, 'note.0.text');
-        $note = is_string($noteText) && $noteText !== '' ? $noteText : null;
+        $note = is_string($noteText) && $noteText !== '' ? DisplayStringSanitizer::sanitize($noteText) : null;
+
+        $recordedDate = data_get($resource, 'recordedDate');
+        $safeRecordedDate = is_string($recordedDate)
+            ? DisplayStringSanitizer::sanitize($recordedDate)
+            : null;
 
         return new ConditionVM(
             id: (string) ($resource['id'] ?? ''),
             patientId: $patientId,
             code: $code,
             text: $text,
-            recordedDate: self::emptyToNull((string) data_get($resource, 'recordedDate', '')),
+            recordedDate: $safeRecordedDate,
             note: $note,
+            encounterId: self::extractRelativeReferenceId((string) data_get($resource, 'encounter.reference', ''), 'Encounter'),
         );
     }
 
@@ -62,7 +72,7 @@ class ConditionMapper
             'clinicalStatus' => [
                 'coding' => [
                     [
-                        'system' => 'http://terminology.hl7.org/CodeSystem/condition-clinical',
+                        'system' => FhirCodeSystems::CONDITION_CLINICAL_STATUS,
                         'code' => 'active',
                         'display' => 'Active',
                     ],
@@ -78,7 +88,7 @@ class ConditionMapper
 
         if ($conditionCode !== '') {
             $resource['code']['coding'][] = [
-                'system' => 'urn:app:condition-code',
+                'system' => FhirCodeSystems::CONDITION,
                 'code' => $conditionCode,
                 'display' => $conditionText !== '' ? $conditionText : $conditionCode,
             ];
@@ -90,7 +100,7 @@ class ConditionMapper
 
         if (empty($resource['code']['coding'])) {
             $resource['code']['coding'][] = [
-                'system' => 'urn:app:condition-code',
+                'system' => FhirCodeSystems::CONDITION,
                 'code' => 'legacy-condition',
                 'display' => $conditionText !== '' ? $conditionText : 'Legacy condition',
             ];
@@ -100,6 +110,11 @@ class ConditionMapper
             $resource['recordedDate'] = CarbonImmutable::parse($vm->recordedDate)->toIso8601String();
         } else {
             $resource['recordedDate'] = CarbonImmutable::now()->toIso8601String();
+        }
+
+        $encounterReference = EncounterMapper::referenceForId($vm->encounterId);
+        if ($encounterReference !== null) {
+            $resource['encounter'] = $encounterReference;
         }
 
         if ($vm->note) {
@@ -115,18 +130,65 @@ class ConditionMapper
         return $resource;
     }
 
-    private static function extractIdFromReference(string $reference): string
+    /**
+     * @return array<string, mixed>
+     */
+    public static function toFacadePayload(ConditionVM $vm): array
     {
-        if ($reference === '') {
-            return '';
+        $conditionText = trim((string) ($vm->text ?? ''));
+        $conditionCode = trim((string) ($vm->code ?? ''));
+
+        $payload = [
+            'clinicalStatus' => 'active',
+        ];
+
+        if ($conditionText !== '') {
+            $payload['codeText'] = $conditionText;
         }
 
-        $parts = explode('/', $reference);
-        return (string) end($parts);
+        if ($conditionCode !== '') {
+            $payload['code'] = [
+                'system' => FhirCodeSystems::CONDITION,
+                'code' => $conditionCode,
+            ];
+            if ($conditionText !== '') {
+                $payload['code']['display'] = $conditionText;
+            }
+        }
+
+        if ($vm->recordedDate) {
+            $payload['recordedDate'] = CarbonImmutable::parse($vm->recordedDate)->toIso8601String();
+        }
+
+        if ($vm->encounterId) {
+            $payload['encounter'] = [
+                'reference' => "Encounter/{$vm->encounterId}",
+            ];
+        }
+
+        if ($vm->note) {
+            $payload['note'] = $vm->note;
+        }
+
+        if (!isset($payload['codeText']) && !isset($payload['code'])) {
+            $payload['codeText'] = $vm->note ?: 'Legacy condition';
+        }
+
+        return $payload;
     }
 
-    private static function emptyToNull(string $value): ?string
+    private static function extractRelativeReferenceId(string $reference, string $resourceType): ?string
     {
-        return $value !== '' ? $value : null;
+        $trimmed = trim($reference);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        $quotedType = preg_quote($resourceType, '/');
+        if (preg_match('/^'.$quotedType.'\/([^\/\s]+)$/', $trimmed, $matches) !== 1) {
+            return null;
+        }
+
+        return $matches[1];
     }
 }
