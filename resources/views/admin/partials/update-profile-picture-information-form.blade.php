@@ -1,11 +1,13 @@
+@php($profileUser = $user ?? request()->user())
+
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Profile Picture') }}
+            {{ __('ui.profile.picture_title') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update profile picture user") }}
+            {{ __('ui.profile.picture_description') }}
         </p>
     </header>
 
@@ -19,10 +21,10 @@
 
         <div class="grid md:gap-6">
             <div>
-                @if ($user->profile_picture)
-                    <img id="profile_picture_edit" src="{{ asset('storage/' . $user->profile_picture) }}" alt="Profile Picture Edit" class="mx-auto w-60 h-60 rounded-full ring-4 border-8 border-transparent ring-slate-600">
+                @if ($profileUser->profile_picture)
+                    <img id="profile_picture_edit" src="{{ asset('storage/' . $profileUser->profile_picture) }}" alt="{{ __('ui.profile.picture_alt') }}" class="mx-auto w-60 h-60 rounded-full ring-4 border-8 border-transparent ring-slate-600">
                 @else
-                    <img id="profile_picture_edit" src="{{ asset('img/default.png') }}" alt="Profile Picture Edit" class="mx-auto w-60 h-60 rounded-full ring-4 border-8 border-transparent ring-slate-600">
+                    <img id="profile_picture_edit" src="{{ asset('img/default.png') }}" alt="{{ __('ui.profile.picture_alt') }}" class="mx-auto w-60 h-60 rounded-full ring-4 border-8 border-transparent ring-slate-600">
                 @endif
                 <div class="relative -mt-12 ml-40">
                     <input onchange="readURL(this);" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" aria-describedby="profile_picture_help" id="profile_picture" name="profile_picture" type="file">
@@ -31,7 +33,7 @@
                             <path d="M12.687 14.408a3.01 3.01 0 0 1-1.533.821l-3.566.713a3 3 0 0 1-3.53-3.53l.713-3.566a3.01 3.01 0 0 1 .821-1.533L10.905 2H2.167A2.169 2.169 0 0 0 0 4.167v11.666A2.169 2.169 0 0 0 2.167 18h11.666A2.169 2.169 0 0 0 16 15.833V11.1l-3.313 3.308Zm5.53-9.065.546-.546a2.518 2.518 0 0 0 0-3.56 2.576 2.576 0 0 0-3.559 0l-.547.547 3.56 3.56Z"/>
                             <path d="M13.243 3.2 7.359 9.081a.5.5 0 0 0-.136.256L6.51 12.9a.5.5 0 0 0 .59.59l3.566-.713a.5.5 0 0 0 .255-.136L16.8 6.757 13.243 3.2Z"/>
                         </svg>
-                        Edit
+                        {{ __('ui.common.edit') }}
                     </button>
                     <input type="hidden" name="type" id="type" value="update">
                 </div>
@@ -40,11 +42,11 @@
 
         <div class="relative">
             <div class="text-center">
-                <button class="mt-2 text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2 mb-2 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900" id="delete_button">{{ __('Delete Profile Picture') }}</button>
+                <button class="mt-2 text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2 mb-2 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900" id="delete_button">{{ __('ui.profile.delete_picture') }}</button>
             </div>
 
             <div class="text-center">
-                <button class="mt-1 text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2 text-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800" id="submit_button" style="display:none">{{ __('Save Profile Picture') }}</button>
+                <button class="mt-1 text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2 text-center dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800" id="submit_button" style="display:none">{{ __('ui.profile.save_picture') }}</button>
             </div>
         </div>
     </form>

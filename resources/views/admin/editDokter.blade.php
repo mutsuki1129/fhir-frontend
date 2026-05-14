@@ -48,7 +48,7 @@
 
                     <div class="flex items-center gap-4">
                         <x-primary-button data-submit-button>
-                            <span data-submit-default>{{ __('Save') }}</span>
+                            <span data-submit-default>{{ __('ui.common.save') }}</span>
                             <span data-submit-loading class="hidden">{{ __('ui.common.saving') }}</span>
                         </x-primary-button>
                     </div>
