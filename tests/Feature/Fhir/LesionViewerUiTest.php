@@ -34,6 +34,33 @@ class LesionViewerUiTest extends TestCase
         );
     }
 
+    public function test_homepage_renders_localized_readonly_entry_and_controls(): void
+    {
+        $this->withSession(['locale' => 'en'])
+            ->get('/')
+            ->assertOk()
+            ->assertSee('Open Lesion Viewer')
+            ->assertSee('aria-label="Theme"', false)
+            ->assertSee('theme-icon-sun', false)
+            ->assertSee('theme-icon-moon', false)
+            ->assertSee('No lesion CRUD')
+            ->assertSee('No formal ingestion')
+            ->assertSee('No FHIR persistence')
+            ->assertDontSee('fhir.home_', false);
+
+        $this->withSession(['locale' => 'zh_TW'])
+            ->get('/')
+            ->assertOk()
+            ->assertSee('開啟病灶檢視器')
+            ->assertSee('aria-label="主題"', false)
+            ->assertSee('theme-icon-sun', false)
+            ->assertSee('theme-icon-moon', false)
+            ->assertSee('不提供病灶 CRUD')
+            ->assertSee('不做正式匯入')
+            ->assertSee('不寫入 FHIR')
+            ->assertDontSee('fhir.home_', false);
+    }
+
     public function test_sidebar_and_dashboard_include_lesion_viewer_entry(): void
     {
         $this->actingAsUser();

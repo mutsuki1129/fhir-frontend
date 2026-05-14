@@ -13,7 +13,7 @@
                         {{ __('fhir.dashboard') }}
                     </x-nav-link>
                     <x-nav-link :href="route('lesions.index')" :active="request()->routeIs('lesions.*')">
-                        Lesion Viewer
+                        {{ __('fhir.lesion_viewer') }}
                     </x-nav-link>
                     <x-nav-link :href="route('fhir.index')" :active="request()->routeIs('fhir.*')">
                         {{ __('fhir.management_center') }}
@@ -26,10 +26,18 @@
                 <button
                     type="button"
                     data-theme-toggle
-                    class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:ring-offset-slate-900"
-                    aria-label="Theme"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:ring-offset-slate-900"
+                    aria-label="{{ __('fhir.theme') }}"
+                    title="{{ __('fhir.theme') }}"
                 >
-                    <span>Theme</span>
+                    <svg class="theme-icon-sun h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+                    </svg>
+                    <svg class="theme-icon-moon h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <span class="sr-only">{{ __('fhir.theme') }}</span>
                 </button>
                 <a href="{{ route('locale.switch', ['locale' => 'en']) }}" class="rounded border px-2 py-1 text-xs font-semibold {{ app()->getLocale() === 'en' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 text-slate-700' }}">EN</a>
                 <a href="{{ route('locale.switch', ['locale' => 'zh_TW']) }}" class="rounded border px-2 py-1 text-xs font-semibold {{ app()->getLocale() === 'zh_TW' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 text-slate-700' }}">ZH</a>
@@ -86,7 +94,7 @@
                 {{ __('fhir.dashboard') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('lesions.index')" :active="request()->routeIs('lesions.*')">
-                Lesion Viewer
+                {{ __('fhir.lesion_viewer') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('fhir.index')" :active="request()->routeIs('fhir.*')">
                 {{ __('fhir.management_center') }}
@@ -95,10 +103,18 @@
                 <button
                     type="button"
                     data-theme-toggle
-                    class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:ring-offset-slate-900"
-                    aria-label="Theme"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:ring-offset-slate-900"
+                    aria-label="{{ __('fhir.theme') }}"
+                    title="{{ __('fhir.theme') }}"
                 >
-                    <span>Theme</span>
+                    <svg class="theme-icon-sun h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+                    </svg>
+                    <svg class="theme-icon-moon h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <span class="sr-only">{{ __('fhir.theme') }}</span>
                 </button>
                 <a href="{{ route('locale.switch', ['locale' => 'en']) }}" class="rounded border px-2 py-1 text-xs font-semibold {{ app()->getLocale() === 'en' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 text-slate-700' }}">EN</a>
                 <a href="{{ route('locale.switch', ['locale' => 'zh_TW']) }}" class="rounded border px-2 py-1 text-xs font-semibold {{ app()->getLocale() === 'zh_TW' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-300 text-slate-700' }}">ZH</a>
