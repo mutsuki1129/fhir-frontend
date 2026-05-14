@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="title">
-        Dashboard
+        {{ __('ui.rekam.title') }}
     </x-slot>
     
     <div>

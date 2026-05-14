@@ -30,7 +30,7 @@ class FrontendReadOnlyUiTest extends TestCase
         $this->get('/pasiens')
             ->assertOk()
             ->assertSee('Read Only Patient')
-            ->assertSee('本頁僅供資料展示')
+            ->assertSee(__('ui.common.readonly_notice'))
             ->assertDontSee('/pasiens/create', false)
             ->assertDontSee('/edit-pasien/', false)
             ->assertDontSee('action="http://localhost:8080/pasiens/patient-readonly-001"', false)
@@ -48,7 +48,7 @@ class FrontendReadOnlyUiTest extends TestCase
             ->assertOk()
             ->assertSee('Read Only Patient')
             ->assertSee('Observation/obs-readonly-001')
-            ->assertSee('本頁僅供資料展示')
+            ->assertSee(__('ui.common.readonly_notice'))
             ->assertDontSee('/rekam/create', false)
             ->assertDontSee('/rekam/obs-readonly-001/edit', false)
             ->assertDontSee('action="http://localhost:8080/rekam/obs-readonly-001"', false)
@@ -65,7 +65,7 @@ class FrontendReadOnlyUiTest extends TestCase
             ->assertOk()
             ->assertSee('Read Only Patient')
             ->assertSee('37.2 C')
-            ->assertSee('本頁僅供資料展示')
+            ->assertSee(__('ui.common.readonly_notice'))
             ->assertDontSee('/rekam/create', false)
             ->assertDontSee('/rekam/obs-readonly-001/edit', false)
             ->assertDontSee('data-upload-start', false);
@@ -80,7 +80,7 @@ class FrontendReadOnlyUiTest extends TestCase
             ->assertOk()
             ->assertSee('Read Only Practitioner')
             ->assertSee('Read Only Patient')
-            ->assertSee('本頁僅供資料展示')
+            ->assertSee(__('ui.common.readonly_notice'))
             ->assertDontSee('/rekam/create', false)
             ->assertDontSee('/rekam/obs-readonly-001/edit', false)
             ->assertDontSee('data-upload-start', false);
@@ -94,10 +94,33 @@ class FrontendReadOnlyUiTest extends TestCase
         $this->get('/dokters')
             ->assertOk()
             ->assertSee('Read Only Practitioner')
-            ->assertSee('本頁僅供資料展示')
+            ->assertSee(__('ui.common.readonly_notice'))
             ->assertDontSee('/dokters/create', false)
             ->assertDontSee('/edit-dokter/', false)
             ->assertDontSee('action="http://localhost:8080/dokters/practitioner-readonly-001"', false);
+    }
+
+    public function test_legacy_write_entry_pages_render_read_only_panels_without_forms(): void
+    {
+        $this->actingAsUser();
+        $this->mockReadOnlyFhirClient();
+
+        foreach ([
+            '/pasiens/create' => __('ui.patients.create_unavailable'),
+            '/edit-pasien/patient-readonly-001' => 'Read Only Patient',
+            '/dokters/create' => __('ui.doctors.practitioner_contract_notice'),
+            '/edit-dokter/practitioner-readonly-001' => 'Read Only Practitioner',
+            '/rekam/create' => __('ui.rekam.create_unavailable'),
+            '/rekam/obs-readonly-001/edit' => 'Observation/obs-readonly-001',
+        ] as $path => $expectedText) {
+            $this->get($path)
+                ->assertOk()
+                ->assertSee(__('ui.common.readonly_notice'))
+                ->assertSee($expectedText)
+                ->assertDontSee('data-enhanced-form', false)
+                ->assertDontSee('data-upload-file', false)
+                ->assertDontSee('data-upload-start', false);
+        }
     }
 
     public function test_medication_request_list_and_detail_remain_read_only_without_create_actions(): void
@@ -273,6 +296,8 @@ class FrontendReadOnlyUiTest extends TestCase
                 ->byDefault()
                 ->andReturnUsing(function (string $resourceType, string $id): array {
                     return match ($resourceType) {
+                        'Patient' => $this->patientResource($id),
+                        'Practitioner' => $this->practitionerResource($id),
                         'Encounter' => $this->encounterResource($id),
                         'DocumentReference' => $this->documentReferenceResource($id),
                         'MedicationRequest' => $this->medicationRequestResource($id),
@@ -358,11 +383,11 @@ class FrontendReadOnlyUiTest extends TestCase
         ];
     }
 
-    private function practitionerResource(): array
+    private function practitionerResource(string $id = 'practitioner-readonly-001'): array
     {
         return [
             'resourceType' => 'Practitioner',
-            'id' => 'practitioner-readonly-001',
+            'id' => $id,
             'name' => [['text' => 'Read Only Practitioner', 'family' => 'Practitioner', 'given' => ['Read Only']]],
             'telecom' => [
                 ['system' => 'email', 'value' => 'readonly-practitioner@example.test'],

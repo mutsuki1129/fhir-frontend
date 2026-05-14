@@ -1,17 +1,15 @@
 <x-app-layout>
     <x-slot name="title">
-        Patients
+        {{ __('ui.patients.title') }}
     </x-slot>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-wrap justify-between items-center gap-3">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight inline-block">
                 {{ __('ui.patients.title') }}
             </h2>
-            <a href="{{ route('pasiens.create') }}"
-               data-page-loading-trigger
-               class="inline-block ml-4 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded hover:bg-green-700 transition">
-                + {{ __('ui.patients.add') }}
-            </a>
+            <p class="rounded border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+                {{ __('ui.common.readonly_notice') }}
+            </p>
             <form action="{{ route('pasiens.list') }}" method="get" class="w-1/2 inline-block" data-page-loading-trigger>
                 <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">{{ __('ui.patients.search_label') }}</label>
                 <div class="relative">
@@ -30,6 +28,11 @@
 
     <div class="relative overflow-x-auto py-10">
         <div class="mx-auto w-full px-8 overflow-x-auto lg:px-56 md:px-14">
+            <div class="mb-5">
+                <a href="{{ route('fhir.index') }}" class="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    {{ __('fhir.back_to_center') }}
+                </a>
+            </div>
             @if (session('status'))
                 <div class="mb-4 rounded border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                     {{ session('status') }}
@@ -40,9 +43,6 @@
                     {{ $errors->first('fhir') }}
                 </div>
             @endif
-            <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                {{ __('ui.patients.phase_list_notice') }}
-            </div>
             @if ($pageError)
                 <x-error-state
                     :title="__('ui.patients.load_error')"
@@ -52,9 +52,7 @@
             @elseif($pasiens->total() === 0)
                 <x-empty-state
                     :title="$query !== '' ? __('ui.patients.empty_filtered') : __('ui.patients.empty')"
-                    :message="$query !== '' ? __('ui.patients.empty_filtered_hint') : __('ui.patients.empty_create_hint')"
-                    :action-label="__('ui.patients.add')"
-                    :action-href="route('pasiens.create')"
+                    :message="$query !== '' ? __('ui.patients.empty_filtered_hint') : __('ui.common.readonly_empty_notice')"
                 />
             @else
             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -103,17 +101,7 @@
                             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{{ $pasien->name }}</td>
                             <td class="px-6 py-4">{{ $pasien->email ?? '-' }}</td>
                             <td class="px-6 py-4">{{ $pasien->phone ?? '-' }}</td>
-                            <td>
-                                <div class="flex gap-1 mr-5">
-                                    <a href="{{ route('pasiens.edit', ['id' => $pasien->id]) }}" data-page-loading-trigger class="flex items-center w-9 h-9 justify-center text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-emerald-500 hover:text-white focus:z-10 focus:ring-2 focus:ring-gray-300">
-                                        <svg data-toggle-icon="edit" class="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M12.687 14.408a3.01 3.01 0 0 1-1.533.821l-3.566.713a3 3 0 0 1-3.53-3.53l.713-3.566a3.01 3.01 0 0 1 .821-1.533L10.905 2H2.167A2.169 2.169 0 0 0 0 4.167v11.666A2.169 2.169 0 0 0 2.167 18h11.666A2.169 2.169 0 0 0 16 15.833V11.1l-3.313 3.308Zm5.53-9.065.546-.546a2.518 2.518 0 0 0 0-3.56 2.576 2.576 0 0 0-3.559 0l-.547.547 3.56 3.56Z"/>
-                                            <path d="M13.243 3.2 7.359 9.081a.5.5 0 0 0-.136.256L6.51 12.9a.5.5 0 0 0 .59.59l3.566-.713a.5.5 0 0 0 .255-.136L16.8 6.757 13.243 3.2Z"/>
-                                        </svg>
-                                        <span class="sr-only">{{ __('ui.common.edit') }}</span>
-                                    </a>
-                                </div>
-                            </td>
+                            <td></td>
                         </tr>
                     @endforeach
                 </tbody>

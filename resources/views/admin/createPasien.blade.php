@@ -1,4 +1,6 @@
 <x-app-layout>
+    <x-slot name="title">{{ __('ui.patients.add') }}</x-slot>
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('ui.patients.add') }}
@@ -7,42 +9,24 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                    {{ __('ui.patients.phase_notice') }}
-                </div>
-
-                <form method="POST" action="{{ route('pasiens.store') }}" data-enhanced-form>
-                    @csrf
-
-                    <div class="grid md:grid-cols-2 md:gap-6">
-                        <div>
-                            <x-input-label for="name" :value="__('ui.common.name')" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" value="{{ old('name') }}" required autofocus />
-                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="email" :value="__('ui.common.email')" />
-                            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" value="{{ old('email') }}" />
-                            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="phone_number" :value="__('ui.common.phone')" />
-                            <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" value="{{ old('phone_number') }}" />
-                            <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-end mt-6">
-                        <x-primary-button data-submit-button>
-                            <span data-submit-default>{{ __('ui.patients.add') }}</span>
-                            <span data-submit-loading class="hidden">{{ __('ui.patients.creating') }}</span>
-                        </x-primary-button>
-                    </div>
-                </form>
+            <div class="mb-5 flex flex-wrap gap-3">
+                <a href="{{ route('fhir.index') }}" class="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    {{ __('fhir.back_to_center') }}
+                </a>
+                <a href="{{ route('pasiens.list') }}" class="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    {{ __('ui.patients.back_to_list') }}
+                </a>
             </div>
+
+            <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                <p class="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+                    {{ __('ui.common.readonly_notice') }}
+                </p>
+                <h3 class="mt-5 text-lg font-semibold text-slate-950">{{ __('ui.patients.add') }}</h3>
+                <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
+                    {{ __('ui.patients.create_unavailable') }}
+                </p>
+            </section>
         </div>
     </div>
 </x-app-layout>

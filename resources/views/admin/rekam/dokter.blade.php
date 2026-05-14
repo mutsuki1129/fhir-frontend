@@ -3,21 +3,30 @@ $previousPerformer = null;
 @endphp
 
 <x-app-layout>
-    <x-slot name="title">{{ __('ui.nav.medical_records') }}</x-slot>
+    <x-slot name="title">{{ __('ui.rekam.practitioner_group_title') }}</x-slot>
 
     <div>
         @include('layouts.sidebar')
         <div class="p-4 sm:ml-64">
             <div class="py-12">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                        {{ __('ui.rekam.deterministic_notice') }}
+                    <div class="mb-5">
+                        <a href="{{ route('fhir.index') }}" class="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            {{ __('fhir.back_to_center') }}
+                        </a>
                     </div>
-                    @if (!empty($conditionWarning))
-                        <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                            {{ __('ui.rekam.condition_warning', ['message' => $conditionWarning]) }}
-                        </div>
-                    @endif
+                    <div class="mb-5">
+                        <h1 class="text-2xl font-semibold text-slate-950">{{ __('ui.rekam.practitioner_group_title') }}</h1>
+                        <p class="mt-1 text-sm text-slate-600">{{ __('ui.rekam.patient_context') }}: {{ __('fhir.all_accessible_patients') }}</p>
+                        <p class="mt-2 rounded border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+                            {{ __('ui.common.readonly_notice') }}
+                        </p>
+                    </div>
+                    <div class="mb-5 flex flex-wrap gap-3">
+                        <a href="{{ route('admin.rekam.list') }}" class="inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                            {{ __('ui.rekam.back_to_list') }}
+                        </a>
+                    </div>
                     @if (!empty($documentReferenceWarning))
                         <div class="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                             {{ __('ui.rekam.document_warning', ['message' => $documentReferenceWarning]) }}
@@ -34,8 +43,6 @@ $previousPerformer = null;
                         <x-empty-state
                             :title="__('ui.rekam.grouped_doctor_empty')"
                             :message="__('ui.rekam.grouped_empty_message')"
-                            :action-label="__('ui.rekam.create_title')"
-                            :action-href="route('admin.rekam.create')"
                         />
                     @else
                     @foreach($rekams as $rekam)
@@ -48,39 +55,14 @@ $previousPerformer = null;
                             <div class="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                                 @foreach($rekams as $rekamInner)
                                     @if(($rekamInner->performerDisplay ?: '-') === $previousPerformer)
-                                        @php($condition = $conditionsByPatient->get($rekamInner->patientId))
                                         @php($documentReference = $documentReferencesByPatient->get($rekamInner->patientId))
+                                        @php($patient = $pasiens->firstWhere('id', $rekamInner->patientId) ?? null)
                                         <div class="w-96 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                                             <div class="p-5 justify-between">
                                                 <div class="mb-3 grid grid-cols-1 gap-3">
-                                                    <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.nav.patients') }}: {{ $rekamInner->patientDisplay ?: $rekamInner->patientId }}</p>
+                                                    <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.rekam.patient_label') }}: {{ $rekamInner->patientDisplay ?: $rekamInner->patientId }}</p>
                                                     <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.rekam.body_temperature_c') }}: {{ $rekamInner->valueCelsius }} C</p>
                                                     <p class="font-normal text-sm text-gray-700 dark:text-white">{{ __('ui.rekam.effective') }}: {{ $rekamInner->effectiveDateTime ?: '-' }}</p>
-
-                                                    @if($condition?->id && ($condition?->text || $condition?->code))
-                                                        <p class="font-normal text-xs">
-                                                            <span class="inline-flex items-center rounded bg-emerald-100 px-2 py-1 text-emerald-800">{{ __('ui.rekam.linked_condition') }}</span>
-                                                        </p>
-                                                        <p class="font-normal text-sm text-gray-700 dark:text-white">
-                                                            {{ __('ui.rekam.condition') }}:
-                                                            {{ $condition->text ?: '-' }}
-                                                            @if($condition->code)
-                                                                <span class="text-xs text-slate-500">({{ $condition->code }})</span>
-                                                            @endif
-                                                        </p>
-                                                    @elseif($rekamInner->note)
-                                                        <p class="font-normal text-xs">
-                                                            <span class="inline-flex items-center rounded bg-amber-100 px-2 py-1 text-amber-800">{{ __('ui.rekam.fallback_legacy_note') }}</span>
-                                                        </p>
-                                                    @else
-                                                        <p class="font-normal text-xs">
-                                                            <span class="inline-flex items-center rounded bg-slate-100 px-2 py-1 text-slate-700">{{ __('ui.rekam.condition_missing') }}</span>
-                                                        </p>
-                                                    @endif
-
-                                                    @if($rekamInner->note)
-                                                        <p class="font-normal text-xs text-amber-700">{{ __('ui.rekam.legacy_note') }}: {{ $rekamInner->note }}</p>
-                                                    @endif
 
                                                     @if($documentReference?->id && $documentReference?->url)
                                                         <p class="font-normal text-xs">
@@ -88,9 +70,10 @@ $previousPerformer = null;
                                                         </p>
                                                         <p class="font-normal text-sm text-gray-700 dark:text-white">
                                                             {{ __('ui.rekam.document') }}:
-                                                            <a href="{{ $documentReference->url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
-                                                                {{ $documentReference->title ?: __('ui.rekam.open_attachment') }}
+                                                            <a href="{{ route('admin.document-references.show', $documentReference->id) }}?from=patient" class="text-blue-600 hover:underline">
+                                                                {{ trim((string) $documentReference->title) !== '' ? $documentReference->title : __('ui.rekam.view_document_metadata') }}
                                                             </a>
+                                                            <span class="ml-2 text-xs text-slate-500">{{ __('ui.rekam.protected_document_message') }}</span>
                                                         </p>
                                                     @elseif($documentReference?->url)
                                                         <p class="font-normal text-xs">
@@ -98,20 +81,14 @@ $previousPerformer = null;
                                                         </p>
                                                         <p class="font-normal text-sm text-gray-700 dark:text-white">
                                                             {{ __('ui.rekam.document') }}:
-                                                            <a href="{{ $documentReference->url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
-                                                                {{ $documentReference->title ?: __('ui.rekam.open_attachment') }}
-                                                            </a>
+                                                            <span>{{ trim((string) $documentReference->title) !== '' ? $documentReference->title : __('ui.rekam.view_document_metadata') }}</span>
+                                                            <span class="ml-2 text-xs text-slate-500">{{ __('ui.rekam.protected_document_message') }}</span>
                                                         </p>
                                                     @else
                                                         <p class="font-normal text-xs">
                                                             <span class="inline-flex items-center rounded bg-slate-100 px-2 py-1 text-slate-700">{{ __('ui.rekam.no_document_reference') }}</span>
                                                         </p>
                                                     @endif
-                                                </div>
-                                                <div class="flex">
-                                                    <a href="{{ route('admin.rekam.edit', $rekamInner->id) }}" data-page-loading-trigger class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
-                                                        {{ __('ui.common.edit') }}
-                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
