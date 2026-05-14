@@ -46,7 +46,7 @@ return [
     'home_preview_surface_description' => 'Observations, Conditions, DiagnosticReports, DocumentReferences, Consents, and Encounters are grouped for reviewer inspection.',
     'home_evidence_label' => 'Demo scope',
     'home_evidence_heading' => 'What the viewer shows',
-    'home_evidence_description' => 'The homepage points reviewers toward the read-only lesion workflow and away from unrelated appointment, marketplace, or developer evidence surfaces.',
+    'home_evidence_description' => 'The homepage points reviewers directly toward the read-only lesion workflow and supporting clinical evidence surfaces.',
     'home_card_list_title' => 'Lesion list',
     'home_card_list_description' => 'Reviewer-friendly summaries, subject context, review state, and resource counts.',
     'home_card_detail_title' => 'Lesion detail',

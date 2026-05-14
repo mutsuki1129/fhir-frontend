@@ -46,6 +46,7 @@ class LesionViewerUiTest extends TestCase
             ->assertSee('No lesion CRUD')
             ->assertSee('No formal ingestion')
             ->assertSee('No FHIR persistence')
+            ->assertDontSee('marketplace')
             ->assertDontSee('fhir.home_', false);
 
         $this->withSession(['locale' => 'zh_TW'])
