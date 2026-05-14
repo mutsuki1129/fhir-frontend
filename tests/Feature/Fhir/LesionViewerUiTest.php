@@ -83,7 +83,7 @@ class LesionViewerUiTest extends TestCase
         $this->withSession(['locale' => 'zh_TW']);
         $this->actingAsUser();
 
-        $this->get('/fhir')
+        $response = $this->get('/fhir')
             ->assertOk()
             ->assertSee('臨床證據中繼資料')
             ->assertSee('只讀安全邊界')
@@ -95,6 +95,14 @@ class LesionViewerUiTest extends TestCase
             ->assertDontSee('Read-only Safety Boundary')
             ->assertDontSee('FHIR Reference Details')
             ->assertDontSee('Supporting views');
+
+        $content = $response->getContent();
+
+        $this->assertSame(1, substr_count($content, '檢視病灶總覽'));
+        $this->assertSame(1, substr_count($content, '檢視文件'));
+        $this->assertStringNotContainsString('檢視 Gateway 狀態', $content);
+        $this->assertStringNotContainsString('檢視安全狀態', $content);
+        $this->assertStringNotContainsString('檢視寫入報告說明', $content);
     }
 
     public function test_lesion_viewer_labels_are_localized_for_zh_tw(): void
