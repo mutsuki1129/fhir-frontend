@@ -123,6 +123,40 @@ class FrontendReadOnlyUiTest extends TestCase
         }
     }
 
+    public function test_residual_patient_update_partial_is_display_only_if_reused(): void
+    {
+        $partial = file_get_contents(resource_path('views/admin/partials/update-patient-fhir-form.blade.php'));
+
+        $this->assertStringContainsString("__('ui.common.readonly_notice')", $partial);
+        $this->assertStringContainsString("__('ui.patients.update_unavailable')", $partial);
+        $this->assertStringNotContainsString('<form', $partial);
+        $this->assertStringNotContainsString('method="post"', $partial);
+        $this->assertStringNotContainsString("route('pasiens.update'", $partial);
+        $this->assertStringNotContainsString("@method('patch')", $partial);
+        $this->assertStringNotContainsString('data-enhanced-form', $partial);
+    }
+
+    public function test_theme_toggle_source_is_icon_only_without_text_mutation(): void
+    {
+        $source = file_get_contents(resource_path('js/app.js'));
+        $navigation = file_get_contents(resource_path('views/layouts/navigation.blade.php'));
+        $home = file_get_contents(resource_path('views/home.blade.php'));
+
+        $this->assertStringContainsString('data-theme-toggle', $source);
+        $this->assertStringContainsString('theme-icon-sun', $navigation . $home);
+        $this->assertStringContainsString('theme-icon-moon', $navigation . $home);
+
+        foreach ([
+            'data-theme-label',
+            'data-theme-icon',
+            'Theme: Dark',
+            'Theme: Light',
+            "textContent = isDark ? 'D' : 'L'",
+        ] as $legacyThemeText) {
+            $this->assertStringNotContainsString($legacyThemeText, $source . $navigation . $home);
+        }
+    }
+
     public function test_medication_request_list_and_detail_remain_read_only_without_create_actions(): void
     {
         $this->actingAsUser();

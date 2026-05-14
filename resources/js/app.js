@@ -7,6 +7,25 @@ window.Alpine = Alpine;
 Alpine.start();
 
 document.addEventListener('DOMContentLoaded', () => {
+    const themeToggleButtons = document.querySelectorAll('[data-theme-toggle]');
+    const updateThemeToggleState = () => {
+        const isDark = document.documentElement.classList.contains('dark');
+
+        themeToggleButtons.forEach((button) => {
+            button.setAttribute('aria-pressed', String(isDark));
+        });
+    };
+
+    themeToggleButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeToggleState();
+        });
+    });
+
+    updateThemeToggleState();
+
     const autoDismissAlerts = document.querySelectorAll('.js-alert-auto');
     autoDismissAlerts.forEach((alertElement) => {
         window.setTimeout(() => {

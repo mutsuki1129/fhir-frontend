@@ -1,33 +1,55 @@
-<section>
-    <form method="post" action="{{ route('pasiens.update', ['id' => $pasien->id]) }}" class="space-y-6" data-enhanced-form>
-        @csrf
-        @method('patch')
+<section class="space-y-6">
+    @php
+        $gender = data_get($pasien, 'gender');
+        $genderLabels = [
+            'male' => __('ui.rekam.gender.male'),
+            'female' => __('ui.rekam.gender.female'),
+            'other' => __('ui.rekam.gender.other'),
+            'unknown' => __('ui.rekam.gender.unknown'),
+        ];
+    @endphp
 
-        <div class="grid md:grid-cols-2 md:gap-6">
-            <div>
-                <x-input-label for="name" :value="__('ui.common.name')" />
-                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $pasien->name)" required autofocus />
-                <x-input-error class="mt-2" :messages="$errors->get('name')" />
-            </div>
+    <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+        <p class="font-semibold">{{ __('ui.patients.update_unavailable') }}</p>
+        <p class="mt-1">{{ __('ui.common.readonly_notice') }}</p>
+    </div>
 
-            <div>
-                <x-input-label for="email" :value="__('ui.common.email')" />
-                <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $pasien->email)" />
-                <x-input-error class="mt-2" :messages="$errors->get('email')" />
-            </div>
-
-            <div>
-                <x-input-label for="phone_number" :value="__('ui.common.phone')" />
-                <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" :value="old('phone_number', $pasien->phone)" />
-                <x-input-error class="mt-2" :messages="$errors->get('phone_number')" />
-            </div>
+    <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="mb-4">
+            <p class="text-xs font-semibold uppercase text-slate-500">{{ __('ui.patients.fhir_metadata') }}</p>
+            <h3 class="text-lg font-semibold text-slate-900">{{ __('ui.patients.detail_title') }}</h3>
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button data-submit-button>
-                <span data-submit-default>{{ __('Save') }}</span>
-                <span data-submit-loading class="hidden">{{ __('ui.common.saving') }}</span>
-            </x-primary-button>
-        </div>
-    </form>
+        <dl class="grid gap-4 md:grid-cols-2">
+            <div>
+                <dt class="text-xs font-semibold uppercase text-slate-500">{{ __('ui.common.name') }}</dt>
+                <dd class="mt-1 text-sm text-slate-900">{{ data_get($pasien, 'name') ?: '-' }}</dd>
+            </div>
+
+            <div>
+                <dt class="text-xs font-semibold uppercase text-slate-500">{{ __('ui.common.email') }}</dt>
+                <dd class="mt-1 text-sm text-slate-900">{{ data_get($pasien, 'email') ?: '-' }}</dd>
+            </div>
+
+            <div>
+                <dt class="text-xs font-semibold uppercase text-slate-500">{{ __('ui.common.phone') }}</dt>
+                <dd class="mt-1 text-sm text-slate-900">{{ data_get($pasien, 'phone') ?: '-' }}</dd>
+            </div>
+
+            <div>
+                <dt class="text-xs font-semibold uppercase text-slate-500">{{ __('ui.patients.birth_date') }}</dt>
+                <dd class="mt-1 text-sm text-slate-900">{{ data_get($pasien, 'birthDate') ?: '-' }}</dd>
+            </div>
+
+            <div>
+                <dt class="text-xs font-semibold uppercase text-slate-500">{{ __('ui.patients.gender') }}</dt>
+                <dd class="mt-1 text-sm text-slate-900">{{ $genderLabels[$gender] ?? ($gender ?: '-') }}</dd>
+            </div>
+
+            <div>
+                <dt class="text-xs font-semibold uppercase text-slate-500">{{ __('ui.patients.address') }}</dt>
+                <dd class="mt-1 text-sm text-slate-900">{{ data_get($pasien, 'address') ?: '-' }}</dd>
+            </div>
+        </dl>
+    </div>
 </section>
