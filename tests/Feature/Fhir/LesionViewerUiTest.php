@@ -97,6 +97,27 @@ class LesionViewerUiTest extends TestCase
             ->assertDontSee('Supporting views');
     }
 
+    public function test_lesion_viewer_labels_are_localized_for_zh_tw(): void
+    {
+        $this->withSession(['locale' => 'zh_TW']);
+        $this->actingAsUser();
+
+        $this->get('/lesions')
+            ->assertOk()
+            ->assertSee('病灶不是 FHIR 資源')
+            ->assertSee('FHIR 資源')
+            ->assertSee('受試者')
+            ->assertDontSee('FHIR resources')
+            ->assertDontSee('Subject metadata');
+
+        $this->get('/lesions/lesion-001')
+            ->assertOk()
+            ->assertSee('病灶 ID')
+            ->assertSee('受試者中繼資料')
+            ->assertDontSee('Lesion ID')
+            ->assertDontSee('Subject metadata');
+    }
+
     public function test_fhir_source_empty_state_is_read_only_and_not_misleading(): void
     {
         Config::set('fhir.lesion_viewer_source', 'fhir');
