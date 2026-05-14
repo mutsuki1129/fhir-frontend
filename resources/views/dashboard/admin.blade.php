@@ -1,24 +1,38 @@
 <x-app-layout>
     <x-slot name="title">
-        Dashboard
+        FHIR Read-only Lesion Viewer
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="overflow-hidden rounded-md bg-white shadow-sm dark:bg-gray-800">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                <h3 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">實現心智醫療數據的標準交換與應用架構：</h3>
-                ◆ Annotated Data 的作業標準：</br>
-                </br>   
-                • 術語標準(SNOMED CT、LOINC、RxNorm)：確保醫療術語語義的一致性</br>
-				</br>
-				• CQL (臨床標準語言格式)：可用於定義臨床決策支持(CDS)與臨床品質量測(CQM)</br>
-                </br>
-                ◆ 可跨平台醫療資訊交換作業：</br>
-				</br>
-                • FHIR (快捷式健康照護交換資源)：提供結構標準化的醫療數據交換與再利用的機制</br>
-				</br>
-                • SMART on FHIR：可讓第三方開發者基於 FHIR 標準，開發可跨系統運行的醫療相關應用系統 </br>
-				</br>
-				<h3 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">使專業人員可以更有效率的交換與應用有價值的數據</h3>
+                    <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Read-only Viewer</p>
+                    <h1 class="mt-2 text-2xl font-semibold">FHIR Read-only Lesion Viewer</h1>
+                    <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-600 dark:text-gray-300">
+                        Use this dashboard as the demo entrance for lesion evidence, FHIR metadata, and supporting read-only clinical context.
+                    </p>
+
+                    <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                        <a href="{{ route('lesions.index') }}" class="rounded-md border border-blue-200 bg-blue-50 p-4 transition hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/40 dark:hover:bg-blue-950">
+                            <h2 class="font-semibold text-blue-950 dark:text-blue-100">Lesion Viewer / 病灶資料總覽</h2>
+                            <p class="mt-2 text-sm text-blue-900 dark:text-blue-200">Open the lesion list, detail view, review metadata, and FHIR reference counts.</p>
+                        </a>
+                        <a href="{{ route('fhir.index') }}" class="rounded-md border border-slate-200 p-4 transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900">
+                            <h2 class="font-semibold">FHIR Metadata</h2>
+                            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Inspect Patient, Observation, Condition, DiagnosticReport, DocumentReference, Consent, and Encounter metadata.</p>
+                        </a>
+                        <a href="{{ route('admin.rekam.list') }}" class="rounded-md border border-slate-200 p-4 transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900">
+                            <h2 class="font-semibold">Clinical Data Viewer</h2>
+                            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Review supporting Observation, Condition, and historical Rekam context.</p>
+                        </a>
+                        <a href="{{ route('pasiens.list') }}" class="rounded-md border border-slate-200 p-4 transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900">
+                            <h2 class="font-semibold">Subject References</h2>
+                            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">View Patient demographics and subject reference context for the evidence viewer.</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>

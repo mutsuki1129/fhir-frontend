@@ -47,8 +47,8 @@ class LesionViewerUiTest extends TestCase
         $lesionPage = $this->get('/lesions')->assertOk();
 
         $this->assertStringContainsString('病灶資料總覽', $lesionPage->getContent());
-        $this->assertStringContainsString('FHIR legacy read-only view', $lesionPage->getContent());
-        $this->assertStringContainsString('輔助資料 / Rekam', $lesionPage->getContent());
+        $this->assertStringContainsString('FHIR Metadata', $lesionPage->getContent());
+        $this->assertStringContainsString('Clinical Data Viewer', $lesionPage->getContent());
     }
 
     public function test_fhir_source_empty_state_is_read_only_and_not_misleading(): void
