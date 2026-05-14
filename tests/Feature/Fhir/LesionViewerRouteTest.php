@@ -35,7 +35,12 @@ class LesionViewerRouteTest extends TestCase
         $this->actingAsUser();
 
         $this->get('/lesions/missing-lesion')
-            ->assertNotFound();
+            ->assertNotFound()
+            ->assertSee('Lesion record not found')
+            ->assertSee('missing-lesion')
+            ->assertSee('Back to lesion list')
+            ->assertDontSee('Laravel')
+            ->assertDontSee('stack trace');
     }
 
     public function test_no_post_patch_or_delete_lesion_routes_exist(): void

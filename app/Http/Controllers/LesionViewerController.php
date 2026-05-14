@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\Fhir\LesionViewer\LesionRepository;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class LesionViewerController extends Controller
 {
@@ -21,11 +22,16 @@ class LesionViewerController extends Controller
         ]);
     }
 
-    public function show(string $lesion): View
+    public function show(string $lesion): View|Response
     {
         $record = $this->lesions->find($lesion);
 
-        abort_if($record === null, 404, 'Lesion viewer record not found.');
+        if ($record === null) {
+            return response()->view('admin.lesions.not-found', [
+                'lesionId' => $lesion,
+                'meta' => $this->lesions->meta(),
+            ], 404);
+        }
 
         return view('admin.lesions.show', [
             'lesion' => $record,
