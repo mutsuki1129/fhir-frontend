@@ -7,72 +7,84 @@
             <div class="py-12">
                 <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <section class="mb-8 rounded-md border border-blue-100 bg-white p-6 shadow-sm">
-                        <p class="text-sm font-semibold uppercase text-blue-700">Read-only FHIR-backed references</p>
-                        <h1 class="mt-2 text-3xl font-semibold text-slate-950">Clinical Evidence Metadata</h1>
+                        <p class="text-sm font-semibold uppercase text-blue-700">{{ __('fhir.fhir_metadata_eyebrow') }}</p>
+                        <h1 class="mt-2 text-3xl font-semibold text-slate-950">{{ __('fhir.fhir_metadata_heading') }}</h1>
                         <p class="mt-3 max-w-3xl text-base leading-7 text-slate-600">
-                            This page summarizes read-only clinical evidence metadata used by the lesion viewer.
-                            It helps reviewers understand which FHIR-backed references support the lesion list and detail screens.
+                            {{ __('fhir.fhir_metadata_description') }}
                         </p>
                         <div class="mt-5 flex flex-wrap gap-2">
-                            @foreach(['Patient / subject metadata', 'Observation', 'Condition', 'DiagnosticReport', 'DocumentReference', 'Consent', 'Encounter'] as $resource)
+                            @foreach([
+                                __('fhir.fhir_metadata_resource_patient_subject'),
+                                __('fhir.fhir_metadata_resource_observation'),
+                                __('fhir.fhir_metadata_resource_condition'),
+                                __('fhir.fhir_metadata_resource_diagnostic_report'),
+                                __('fhir.fhir_metadata_resource_document_reference'),
+                                __('fhir.fhir_metadata_resource_consent'),
+                                __('fhir.fhir_metadata_resource_encounter'),
+                            ] as $resource)
                                 <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-100">{{ $resource }}</span>
                             @endforeach
                         </div>
                     </section>
 
-                    <section class="mb-8 rounded-md border border-slate-200 bg-slate-50 p-5" aria-label="Read-only safety boundary">
-                        <h2 class="text-lg font-semibold text-slate-950">Read-only Safety Boundary</h2>
+                    <section class="mb-8 rounded-md border border-slate-200 bg-slate-50 p-5" aria-label="{{ __('fhir.fhir_safety_boundary_title') }}">
+                        <h2 class="text-lg font-semibold text-slate-950">{{ __('fhir.fhir_safety_boundary_title') }}</h2>
                         <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                            The viewer displays existing server/FHIR-supplied evidence only. This demo does not expose formal ingestion,
-                            FHIR persistence, approval/signoff persistence, or lesion mutation workflows.
+                            {{ __('fhir.fhir_safety_boundary_description') }}
                         </p>
                         <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            @foreach(['No create', 'No edit', 'No delete', 'No upload', 'No FHIR write', 'No formal ingestion', 'No approval/signoff persistence'] as $boundary)
+                            @foreach([
+                                __('fhir.fhir_boundary_no_create'),
+                                __('fhir.fhir_boundary_no_edit'),
+                                __('fhir.fhir_boundary_no_delete'),
+                                __('fhir.fhir_boundary_no_upload'),
+                                __('fhir.fhir_boundary_no_fhir_write'),
+                                __('fhir.fhir_boundary_no_formal_ingestion'),
+                                __('fhir.fhir_boundary_no_approval_persistence'),
+                            ] as $boundary)
                                 <div class="rounded border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">{{ $boundary }}</div>
                             @endforeach
                         </div>
                     </section>
 
-                    <section class="rounded-md border border-slate-200 bg-white p-5 shadow-sm" aria-label="FHIR Reference Details">
+                    <section class="rounded-md border border-slate-200 bg-white p-5 shadow-sm" aria-label="{{ __('fhir.fhir_reference_details_title') }}">
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div>
-                                <h2 class="text-xl font-semibold text-slate-950">FHIR Reference Details</h2>
+                                <h2 class="text-xl font-semibold text-slate-950">{{ __('fhir.fhir_reference_details_title') }}</h2>
                                 <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                                    Use these display-only views to inspect resource counts, reference IDs, timestamps,
-                                    aggregation status, and source metadata connected to the read-only lesion viewer.
+                                    {{ __('fhir.fhir_reference_details_description') }}
                                 </p>
                             </div>
                             <a href="{{ route('lesions.index') }}" class="inline-flex items-center justify-center rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800">
-                                Open Lesion Viewer
+                                {{ __('fhir.home_open_viewer') }}
                             </a>
                         </div>
                         <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                             <a href="{{ route('lesions.index') }}" class="rounded-md border border-slate-200 bg-slate-50 p-4 hover:border-blue-200 hover:bg-blue-50">
-                                <p class="text-sm font-semibold text-slate-950">Lesion evidence summary</p>
-                                <p class="mt-2 text-sm leading-6 text-slate-600">List and detail context with subject, review, and grouped FHIR reference metadata.</p>
+                                <p class="text-sm font-semibold text-slate-950">{{ __('fhir.fhir_reference_lesion_summary_title') }}</p>
+                                <p class="mt-2 text-sm leading-6 text-slate-600">{{ __('fhir.fhir_reference_lesion_summary_description') }}</p>
                             </a>
                             <a href="{{ route('admin.diagnostic-reports.index') }}" class="rounded-md border border-slate-200 bg-slate-50 p-4 hover:border-blue-200 hover:bg-blue-50">
-                                <p class="text-sm font-semibold text-slate-950">DiagnosticReport references</p>
-                                <p class="mt-2 text-sm leading-6 text-slate-600">Report status, code, effective/issued timestamps, and linked Observation references.</p>
+                                <p class="text-sm font-semibold text-slate-950">{{ __('fhir.fhir_reference_diagnostic_report_title') }}</p>
+                                <p class="mt-2 text-sm leading-6 text-slate-600">{{ __('fhir.fhir_reference_diagnostic_report_description') }}</p>
                             </a>
                             <a href="{{ route('admin.document-references.index') }}" class="rounded-md border border-slate-200 bg-slate-50 p-4 hover:border-blue-200 hover:bg-blue-50">
-                                <p class="text-sm font-semibold text-slate-950">DocumentReference metadata</p>
-                                <p class="mt-2 text-sm leading-6 text-slate-600">Document status, type, date, content type, encounter, author, and protected attachment metadata.</p>
+                                <p class="text-sm font-semibold text-slate-950">{{ __('fhir.fhir_reference_document_reference_title') }}</p>
+                                <p class="mt-2 text-sm leading-6 text-slate-600">{{ __('fhir.fhir_reference_document_reference_description') }}</p>
                             </a>
                             <a href="{{ route('admin.encounters.index') }}" class="rounded-md border border-slate-200 bg-slate-50 p-4 hover:border-blue-200 hover:bg-blue-50">
-                                <p class="text-sm font-semibold text-slate-950">Encounter links</p>
-                                <p class="mt-2 text-sm leading-6 text-slate-600">Encounter period, class, subject, linked Observation, and linked Condition metadata.</p>
+                                <p class="text-sm font-semibold text-slate-950">{{ __('fhir.fhir_reference_encounter_links_title') }}</p>
+                                <p class="mt-2 text-sm leading-6 text-slate-600">{{ __('fhir.fhir_reference_encounter_links_description') }}</p>
                             </a>
                         </div>
                     </section>
 
-                    <section class="mt-8 rounded-md border border-amber-200 bg-amber-50 p-5" aria-label="Developer and QA Evidence">
+                    <section class="mt-8 rounded-md border border-amber-200 bg-amber-50 p-5" aria-label="{{ __('fhir.developer_qa_evidence') }}">
                         <div>
-                            <p class="text-sm font-semibold uppercase text-amber-800">Implementation Notes</p>
-                            <h2 class="mt-1 text-xl font-semibold text-slate-950">Developer / QA Evidence</h2>
+                            <p class="text-sm font-semibold uppercase text-amber-800">{{ __('fhir.implementation_notes') }}</p>
+                            <h2 class="mt-1 text-xl font-semibold text-slate-950">{{ __('fhir.developer_qa_evidence') }}</h2>
                             <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-                                The items below are retained for implementation traceability. They are documentation or report-only
-                                review surfaces for this demo, not active FHIR write, production SMART/Gateway readiness, or CDS activation.
+                                {{ __('fhir.developer_qa_evidence_description') }}
                             </p>
                         </div>
                     </section>
@@ -110,9 +122,9 @@
                     <section id="qa-testing" class="mt-8 rounded-md border border-slate-200 bg-white p-5 shadow-sm">
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div>
-                                <h2 class="text-xl font-semibold text-slate-950">Developer / QA Documentation Index</h2>
+                                <h2 class="text-xl font-semibold text-slate-950">{{ __('fhir.developer_qa_docs_title') }}</h2>
                                 <p class="mt-2 text-sm leading-6 text-slate-600">
-                                    Phase docs, testing command references, evidence links, and markdown paths are kept here for QA traceability.
+                                    {{ __('fhir.developer_qa_docs_description') }}
                                 </p>
                             </div>
                             <a href="{{ route('fhir.ig') }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">

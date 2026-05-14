@@ -75,7 +75,26 @@ class LesionViewerUiTest extends TestCase
 
         $this->assertStringContainsString('Lesion Viewer', $lesionPage->getContent());
         $this->assertStringContainsString('FHIR Metadata', $lesionPage->getContent());
-        $this->assertStringContainsString('Clinical Data Viewer', $lesionPage->getContent());
+        $this->assertStringContainsString('Clinical Data Display', $lesionPage->getContent());
+    }
+
+    public function test_fhir_metadata_page_and_sidebar_are_localized_for_zh_tw(): void
+    {
+        $this->withSession(['locale' => 'zh_TW']);
+        $this->actingAsUser();
+
+        $this->get('/fhir')
+            ->assertOk()
+            ->assertSee('臨床證據中繼資料')
+            ->assertSee('只讀安全邊界')
+            ->assertSee('FHIR 參照詳情')
+            ->assertSee('開啟病灶檢視器')
+            ->assertSee('支援檢視')
+            ->assertSee('臨床資料展示')
+            ->assertDontSee('Clinical Evidence Metadata')
+            ->assertDontSee('Read-only Safety Boundary')
+            ->assertDontSee('FHIR Reference Details')
+            ->assertDontSee('Supporting views');
     }
 
     public function test_fhir_source_empty_state_is_read_only_and_not_misleading(): void
