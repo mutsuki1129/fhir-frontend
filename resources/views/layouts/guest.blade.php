@@ -11,8 +11,20 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        @php
+            $manifestPath = public_path('build/manifest.json');
+            $manifest = file_exists($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
+            $cssAsset = $manifest['resources/css/app.css']['file'] ?? null;
+            $jsAsset = $manifest['resources/js/app.js']['file'] ?? null;
+        @endphp
+
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @if ($cssAsset && $jsAsset)
+            <link rel="stylesheet" href="{{ asset('build/'.$cssAsset) }}">
+            <script type="module" src="{{ asset('build/'.$jsAsset) }}"></script>
+        @else
+            @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @endif
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
