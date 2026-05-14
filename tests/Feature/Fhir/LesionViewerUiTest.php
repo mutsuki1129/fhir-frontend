@@ -29,7 +29,7 @@ class LesionViewerUiTest extends TestCase
         }
 
         $this->assertStringContainsString(
-            '同意與簽核參照（僅供檢視）',
+            "{{ __('fhir.consent_references') }}",
             file_get_contents(resource_path('views/admin/lesions/show.blade.php')),
         );
     }
@@ -56,7 +56,7 @@ class LesionViewerUiTest extends TestCase
             ->assertSee('theme-icon-sun', false)
             ->assertSee('theme-icon-moon', false)
             ->assertSee('不提供病灶 CRUD')
-            ->assertSee('不做正式匯入')
+            ->assertSee('不進行正式匯入')
             ->assertSee('不寫入 FHIR')
             ->assertDontSee('fhir.home_', false);
     }
@@ -68,12 +68,12 @@ class LesionViewerUiTest extends TestCase
         $this->get('/dashboard')
             ->assertOk()
             ->assertSee('FHIR Read-only Lesion Viewer')
-            ->assertSee('病灶資料總覽')
+            ->assertSee('Lesion Viewer')
             ->assertSee('href="' . route('lesions.index') . '"', false);
 
         $lesionPage = $this->get('/lesions')->assertOk();
 
-        $this->assertStringContainsString('病灶資料總覽', $lesionPage->getContent());
+        $this->assertStringContainsString('Lesion Viewer', $lesionPage->getContent());
         $this->assertStringContainsString('FHIR Metadata', $lesionPage->getContent());
         $this->assertStringContainsString('Clinical Data Viewer', $lesionPage->getContent());
     }
@@ -94,9 +94,9 @@ class LesionViewerUiTest extends TestCase
 
         $response = $this->get('/lesions')
             ->assertOk()
-            ->assertSee('目前顯示的是 FHIR DiagnosticReport 聚合後的只讀病灶展示資料。')
-            ->assertSee('目前沒有可顯示的 read-only lesion / clinical evidence data。')
-            ->assertSee('此頁只展示 server / FHIR 提供的資料；沒有資料時不會在此頁產生新資料、檔案匯入或臨床寫入流程。');
+            ->assertSee('Displays read-only lesion evidence derived from FHIR DiagnosticReport metadata.')
+            ->assertSee('No read-only lesion / clinical evidence data is available yet.')
+            ->assertSee('this display remains empty instead of offering manual entry or frontend write workflow');
 
         foreach ($this->forbiddenLabels() as $label) {
             $response->assertDontSee($label, false);
@@ -112,7 +112,7 @@ class LesionViewerUiTest extends TestCase
                 'resourceType' => 'DiagnosticReport',
                 'id' => 'report-001',
                 'status' => 'final',
-                'code' => ['text' => '病灶相關臨床報告'],
+                'code' => ['text' => 'Lesion review diagnostic report'],
                 'subject' => [
                     'reference' => 'Patient/patient-001',
                     'display' => 'P-001',
@@ -124,7 +124,7 @@ class LesionViewerUiTest extends TestCase
                 'performer' => [
                     ['display' => 'clinician-reviewed workflow'],
                 ],
-                'conclusion' => '展示用摘要，不包含自動診斷或治療建議。',
+                'conclusion' => 'Evidence summary for review only; no clinical advice is persisted.',
                 'issued' => '2026-05-12T00:00:00Z',
             ]);
             $mock->shouldReceive('read')->once()->with('Patient', 'patient-001')->andReturn([
@@ -138,7 +138,7 @@ class LesionViewerUiTest extends TestCase
                 'resourceType' => 'Observation',
                 'id' => 'obs-001',
                 'status' => 'final',
-                'code' => ['text' => '體溫觀察'],
+                'code' => ['text' => 'Body temperature observation'],
                 'effectiveDateTime' => '2026-05-12T00:00:00Z',
                 'valueQuantity' => [
                     'value' => 36.8,
@@ -160,10 +160,10 @@ class LesionViewerUiTest extends TestCase
 
         $response = $this->get('/lesions/lesion-report-001')
             ->assertOk()
-            ->assertSee('Subject 摘要')
-            ->assertSee('觀察資料摘要')
-            ->assertSee('互動 / 觀察事件')
-            ->assertSee('FHIR 來源參照')
+            ->assertSee('Subject metadata')
+            ->assertSee('Observation references')
+            ->assertSee('Encounter / Patient context')
+            ->assertSee('FHIR resource references')
             ->assertSee('masked')
             ->assertSee('36.8 Cel');
 
@@ -188,7 +188,7 @@ class LesionViewerUiTest extends TestCase
             'clinical advice',
             'automatic diagnosis',
             '診斷結果',
-            'AI 判定',
+            'AI 判讀',
             '治療建議',
         ];
     }
