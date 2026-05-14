@@ -91,10 +91,13 @@ class LesionViewerUiTest extends TestCase
             ->assertSee('開啟病灶檢視器')
             ->assertSee('支援檢視')
             ->assertSee('臨床資料展示')
+            ->assertSee('載入中')
+            ->assertSee('請稍候，正在準備下一個頁面。')
             ->assertDontSee('Clinical Evidence Metadata')
             ->assertDontSee('Read-only Safety Boundary')
             ->assertDontSee('FHIR Reference Details')
-            ->assertDontSee('Supporting views');
+            ->assertDontSee('Supporting views')
+            ->assertDontSee('Please wait while the next page is prepared.');
 
         $content = $response->getContent();
 

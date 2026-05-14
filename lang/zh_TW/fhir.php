@@ -530,6 +530,8 @@ return [
     'scope' => '範圍',
     'category' => '分類',
     'safe_restricted_wording' => '受限制文字已隱藏',
+    'loading' => '載入中',
+    'loading_next_page_message' => '請稍候，正在準備下一個頁面。',
     'created_at' => '建立時間',
     'no_records' => '沒有紀錄',
 ];

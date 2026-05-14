@@ -530,6 +530,8 @@ return [
     'scope' => 'Scope',
     'category' => 'Category',
     'safe_restricted_wording' => 'Restricted wording hidden',
+    'loading' => 'Loading',
+    'loading_next_page_message' => 'Please wait while the next page is prepared.',
     'created_at' => 'Created At',
     'no_records' => 'No records',
 ];
